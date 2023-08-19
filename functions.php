@@ -32,22 +32,23 @@ function handleStock($operation, $stockChange = null, $article_id = null, $value
     }
 }
 
-function handleStock2($operation, $stockChange = null, $article_id = null, $value = null) {
+function handleStock2($operation, $stockChange = null, $article_id = null, $value = null, $from_barcode = 0) {
     $flag = 0;
     if ($stockChange != null) {
         foreach($stockChange as $key => $value){
             if($value and !($value==0)){
                 $article_id = intval($key);
                 $value = intval($value);
-                $flag = updateStock($operation, $article_id, $value);
+                $flag = updateStock($operation, $article_id, $value, $from_barcode);
             }
         }
     } else if ($article_id != null && $value != null) {
-        $flag = updateStock($operation, $article_id, $value);
+        $flag = updateStock($operation, $article_id, $value, $from_barcode);
     }
 
     return $flag;
 }
+
 
 
 function updateStock($operation, $article_id, $value, $fromBarcode = 0) {
