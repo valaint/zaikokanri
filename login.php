@@ -6,11 +6,10 @@
 
     // When form submitted, check and create user session.
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $username = mysqli_real_escape_string($con, $_POST['username']);
-        
-        // Check user is exist in the database
-        $query    = "SELECT * FROM `users` WHERE username='$username'";
-        $result = mysqli_query($con, $query) or die(mysql_error());
+        $stmt = $con->prepare("SELECT * FROM `users` WHERE username=?");
+        $stmt->bind_param("s", $_POST['username']);
+        $stmt->execute();
+        $result = $stmt->get_result();
         $rows = mysqli_num_rows($result);
         
         if ($rows == 1) {
