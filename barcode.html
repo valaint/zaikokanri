@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>在庫管理</title>
+  <link href="src/bootstrap.css" rel="stylesheet">
+  <style>
+    body, html {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      max-width: 600px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+    }
+    #barcode-input {
+      font-size: 1.5rem;
+      height: auto;
+      padding: 0.5rem;
+    }
+    #response-container {
+      margin-top: 2rem;
+      font-size: 1.25rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>在庫管理</h1>
+  <form id="barcode-form">
+    <div class="mb-3">
+      <label for="barcode-input" class="form-label">バーコードを入力してください:</label>
+      <input type="text" class="form-control" id="barcode-input" autofocus>
+    </div>
+    <button id="submit-button" type="submit" class="btn btn-primary">Submit</button>
+  </form>
+  <div id="response-container"></div>
+</div>
+<audio id="success-sound" controls hidden>
+  <source src='出庫しました.wav'>
+</audio>
+<audio id="noitem-sound" controls hidden>
+  <source src='物品リストにありません.wav'>
+</audio>
+<script src="src/jquery.js"></script>
+<script src="src/bootstrap.bundle.js"></script>
+<script>
+  $(document).ready(function() {
+    var successSound = document.getElementById('success-sound');
+    var noitemSound = document.getElementById('noitem-sound');
+
+
+    $("#barcode-form").submit(function(event) {
+      event.preventDefault(); // prevent the form from submitting normally
+
+      var barcode = $("#barcode-input").val();
+
+      $.ajax({
+        url: 'api_barcode.php',
+        method: 'POST',
+        data: JSON.stringify({
+          barcodetext: barcode
+        }),
+        contentType: 'application/json',
+        success: function(response) {
+          var data = JSON.parse(response);
+          var htmlContent = "";
+          var success = false;
+
+          data.forEach(function(item) {
+            if(item.error) {
+              htmlContent += "<p style='color:red;'>" + item.error + "</p>";
+              if (item.error.includes('物品リストにありません')) {
+      noitemSound.play();
+    }
+            } else {
+              htmlContent += "<p>" + item.article_name + " - " + item.count + "</p>";
+              success = true;
+            }
+          });
+
+          $("#response-container").html(htmlContent);
+          $("#barcode-input").val("");
+          $("#barcode-input").focus();
+
+          if(success) {
+            successSound.play();
+          }
+        }
+      });
+    });
+
+
+    $("#barcode-input").keydown(function(e) {
+      if(e.keyCode == 13) {
+        $("#submit-button").click();
+      }
+    });
+  });
+
+</script>
+
+</body>
+</html>

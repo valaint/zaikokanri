@@ -1,0 +1,40 @@
+<?php
+require_once('connect.php');
+
+
+function log_api_request($method, $url, $headers, $body) {
+    global $con;
+
+    $method = mysqli_real_escape_string($con, $method);
+    $url = mysqli_real_escape_string($con, $url);
+    $headers = mysqli_real_escape_string($con, $headers);
+    $body = mysqli_real_escape_string($con, $body);
+
+    $sql = "INSERT INTO api_requests (method, url, headers, body) VALUES ('{$method}', '{$url}', '{$headers}', '{$body}')";
+    mysqli_query($con, $sql);
+
+    return mysqli_insert_id($con);
+}
+
+function log_api_response($request_id, $status_code, $headers, $body) {
+    global $con;
+
+    $status_code = mysqli_real_escape_string($con, $status_code);
+    $headers = mysqli_real_escape_string($con, $headers);
+    $body = mysqli_real_escape_string($con, $body);
+
+    $sql = "INSERT INTO api_responses (request_id, status_code, headers, body) VALUES ({$request_id}, '{$status_code}', '{$headers}', '{$body}')";
+    mysqli_query($con, $sql);
+}
+
+function log_api_exception($request_id, $exception_message, $exception_trace) {
+    global $con;
+
+    $exception_message = mysqli_real_escape_string($con, $exception_message);
+    $exception_trace = mysqli_real_escape_string($con, $exception_trace);
+
+    $sql = "INSERT INTO api_exceptions (request_id, exception_message, exception_trace) VALUES ({$request_id}, '{$exception_message}', '{$exception_trace}')";
+    mysqli_query($con, $sql);
+}
+
+?>

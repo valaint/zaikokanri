@@ -1,0 +1,47 @@
+<html>
+<head>
+    <link href="src/bootstrap.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="src/jquery.js"></script>
+    <script src="src/jquery-ui.js"></script>
+    <script>
+        $( function() {
+            $( "#start_date" ).datepicker();
+            $( "#end_date" ).datepicker();
+        } );
+    </script>
+    <meta charset="utf-8">
+    <title>
+        Stock History
+    </title>
+</head>
+<body>
+<div class="container-fluid border">
+    <div class="row">
+        <div class="col-12 align-items-center">
+            <h1 class="text-center">Stock History</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <form action="export_stock_history.php" method="get">
+                <label for="start_date">Start Date:</label>
+                <input type="text" id="start_date" name="start_date">
+                <label for="end_date">End Date:</label>
+                <input type="text" id="end_date" name="end_date">
+                <label for="type">Type:</label>
+                <select id="type" name="type">
+                    <option value="all">All</option>
+                    <option value="入庫">入庫</option>
+                    <option value="出庫">出庫</option>
+                </select>
+                <label for="group_by_article">Group by Article:</label>
+                <input type="checkbox" id="group_by_article" name="group_by_article">
+                <input type="submit" formaction="export_stock_history.php" value="Export to CSV">
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

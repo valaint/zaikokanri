@@ -1,0 +1,2 @@
+{"uuid":161,"exception_message":"","exception_trace":"","log_type":"api_exception"}
+{"uuid":162,"exception_message":"","exception_trace":"","log_type":"api_exception"}
