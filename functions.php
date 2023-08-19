@@ -50,7 +50,7 @@ function handleStock2($operation, $stockChange = null, $article_id = null, $valu
 }
 
 
-function updateStock($operation, $article_id, $value) {
+function updateStock($operation, $article_id, $value, $fromBarcode = 0) {
     global $con;
     $stmt = $con->prepare("SELECT stock FROM article_info WHERE article_id = ?");
     $stmt->bind_param("i", $article_id);
@@ -66,12 +66,13 @@ function updateStock($operation, $article_id, $value) {
     // Set the type based on the operation
     $type = $operation === 'restock' ? '入庫' : '出庫';
 
-    // Insert the operation into history
-    $stmt = $con->prepare("INSERT INTO history (article_id, type, original_value, updated_value) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("isii", $article_id, $type, $original_stock, $updated);
+    // Insert the operation into history with from_barcode information
+    $stmt = $con->prepare("INSERT INTO history (article_id, type, original_value, updated_value, from_barcode) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("isiii", $article_id, $type, $original_stock, $updated, $fromBarcode);
     if (!$stmt->execute()) {
-        logError(mysqli_error($con), "INSERT INTO history (article_id, type, original_value, updated_value) VALUES ($article_id, $type, $original_stock, $updated)");
+        logError(mysqli_error($con), "INSERT INTO history (article_id, type, original_value, updated_value, from_barcode) VALUES ($article_id, $type, $original_stock, $updated, $fromBarcode)");
     }
+
 
     // Update the article's stock
     $stmt = $con->prepare("UPDATE article_info SET stock = ? WHERE article_id = ?");
