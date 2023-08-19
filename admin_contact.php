@@ -11,8 +11,8 @@ $result = $con->query("SELECT `contact_id`, `name`, `email` FROM `contact`");
         <thead>
             <tr>
                 <th>Contact ID</th>
-                <th>Name</th>
-                <th>Email</th>
+                <th>名前</th>
+                <th>メールアドレス</th>
                 <th></th>
                 <th></th>
             </tr>

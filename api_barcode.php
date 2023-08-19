@@ -27,7 +27,7 @@ if (isset($input['barcodetext'])) {
             $response[] = ['error' => "物品リストにありません $barcode"];
         } else {
             while ($row = $result->fetch_row()) {
-                if (handleStock2('destock', null, $row[0], $row[1])) {
+                if (handleStock2('destock', null, $row[0], $row[1],1)) {
                     // Add each destocked article, its count and name to the response
                     $response[] = ['article_name' => $row[2], 'count' => $row[1]];
                 } else {
