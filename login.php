@@ -16,7 +16,7 @@
             $user = mysqli_fetch_assoc($result);
             $passwordIsValid = password_verify($_POST['password'], $user['password']);
             if ($passwordIsValid) {
-                $_SESSION['username'] = $username;
+                $_SESSION['username'] = $_POST['username'];
                 // Redirect to user dashboard page
                 header("Location: admin.php");
             } else {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>在庫管理</title>
-  <link href="src/bootstrap.css" rel="stylesheet">
+  <link href="src/bootstrap.min.css" rel="stylesheet">
   <style>
     body, html {
       height: 100%;
@@ -29,6 +29,14 @@
       margin-top: 2rem;
       font-size: 1.25rem;
     }
+    @media (max-width: 600px) {
+   h1 {
+      font-size: 2rem;
+   }
+   #barcode-input {
+      font-size: 1.2rem;
+    }
+  }
   </style>
 </head>
 <body>
@@ -49,8 +57,8 @@
 <audio id="noitem-sound" controls hidden>
   <source src='物品リストにありません.wav'>
 </audio>
-<script src="src/jquery.js"></script>
-<script src="src/bootstrap.bundle.js"></script>
+<script src="src/jquery.min.js"></script>
+<!-- <script src="src/bootstrap.bundle.min.js"></script> -->
 <script>
   $(document).ready(function() {
     var successSound = document.getElementById('success-sound');
