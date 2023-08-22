@@ -1,5 +1,9 @@
 <?php include_once 'admin_header.php'; ?>
-
+<style>
+    .highlight {
+    background-color: yellow;
+}
+</style>
 <script>
 $(function() {
     $("#sortable").sortable({
@@ -24,17 +28,54 @@ $(function() {
             });
         }
     }).disableSelection();
+    $("#searchArticle").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#articleTable tr").each(function() {
+        var articleName = $(this).find('td:first').text().toLowerCase(); // Target the first <td> which is "品名"
+        var matched = articleName.indexOf(value) > -1;
+        $(this).toggle(matched);
+
+        if (matched) {
+            var regex = new RegExp(value, 'gi');
+            // Highlight the matched text in the "品名" column
+            var highlightedText = articleName.replace(regex, function(match) {
+                return "<span class='highlight'>" + match + "</span>";
+            });
+            $(this).find('td:first').html(highlightedText);
+        }
+    });
+});
+
+$('#belowThresholdFilter, #outOfStockFilter').on('change', function() {
+    $("#articleTable tr").each(function() {
+        let articleStock = parseInt($(this).find('input[name="data[' + $(this).data('article-id') + '][stock]"]').val(), 10);
+        let articleThreshold = parseInt($(this).find('input[name="data[' + $(this).data('article-id') + '][threshold]"]').val(), 10);
+
+        if ($('#belowThresholdFilter').is(':checked') && articleStock > articleThreshold) {
+            $(this).hide();
+        } else if ($('#outOfStockFilter').is(':checked') && articleStock !== 0) {
+            $(this).hide();
+        } else {
+            $(this).show();
+        }
+    });
+});
 });
 $(document).on('click', '.btn-primary', function() {
     var articleId = $(this).data('id');
     // Fetch the article data based on the ID (e.g., using AJAX)
     // Populate the modal fields with the fetched data
 });
+
+
 </script>
 
 <div class="container">
+<input type="text" id="searchArticle" placeholder="Search for articles...">
+<label><input type="checkbox" id="belowThresholdFilter"> Below Threshold</label>
+<label><input type="checkbox" id="outOfStockFilter"> Out of Stock</label>
     <form action='update_article.php' method='post'>
-        <table class="table table-striped table-hover">
+    <table class="table table-striped table-hover" id="articleTable">
             <thead class="thead-dark">
                 <tr>
                     <th>品名</th>
@@ -96,7 +137,9 @@ $(document).on('click', '.btn-primary', function() {
                 </button>
             </div>
             <div class="modal-body">
-                <!-- Your form fields for editing the article will go here -->
+            <input type="text" name="article_name" placeholder="Article Name">
+            <input type="text" name="stock" placeholder="Stock">
+            <input type="text" name="threshold" placeholder="Threshold">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
