@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<ruleset name="Zaikokanri">
+    <description>PHP_CodeSniffer rules for Zaikokanri</description>
+
+    <!-- Scan these files -->
+    <file>.</file>
+
+    <!-- Exclude third-party libraries -->
+    <exclude-pattern>vendor/</exclude-pattern>
+    <exclude-pattern>node_modules/</exclude-pattern>
+    <exclude-pattern>src/</exclude-pattern>
+    <exclude-pattern>tcpdf/</exclude-pattern>
+    <exclude-pattern>phpqrcode/</exclude-pattern>
+    <exclude-pattern>phpbarcode/</exclude-pattern>
+    <exclude-pattern>popper.js</exclude-pattern>
+
+    <!-- Use PSR-12 as the base standard -->
+    <rule ref="PSR12">
+        <!-- Relax rules that conflict with procedural PHP style -->
+        <exclude name="PSR1.Classes.ClassDeclaration"/>
+        <exclude name="PSR1.Files.SideEffects"/>
+        <exclude name="PSR12.Files.FileHeader"/>
+    </rule>
+
+    <!-- Line length: warn at 120, error at 200 -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="200"/>
+        </properties>
+    </rule>
+</ruleset>

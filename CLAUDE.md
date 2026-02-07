@@ -12,12 +12,13 @@
 - **PDF Generation**: TCPDF v6.6.2
 - **Barcode/QR**: phpbarcode, phpqrcode libraries
 - **Charts**: Chart.js (loaded via CDN in `count.php`)
+- **Package Manager**: Composer (for dev tools and phpdotenv)
 
 ## Project Structure
 
 ```
 /
-├── connect.php              # Database connection (MySQLi)
+├── connect.php              # Database connection (MySQLi, uses .env)
 ├── functions.php            # Core business logic (handleStock, updateStock, logError)
 ├── header.php / footer.php  # Shared HTML layout (user-facing)
 ├── admin_header.php / admin_footer.php  # Admin layout
@@ -63,6 +64,19 @@
 ├── hiddenclick.js           # Hidden submit form handler
 ├── popper.js                # Tooltip positioning library
 │
+├── composer.json             # Composer config (PHPUnit, PHP_CodeSniffer, phpdotenv)
+├── phpunit.xml               # PHPUnit configuration
+├── phpcs.xml                 # PHP_CodeSniffer rules (PSR-12 base)
+├── .editorconfig             # Editor coding style consistency
+├── .gitignore                # Git ignore rules
+├── .env.example              # Environment variable template
+├── .github/workflows/ci.yml  # GitHub Actions CI pipeline
+│
+├── tests/                   # PHPUnit test suite
+│   ├── bootstrap.php        # Test bootstrap (DB setup, function loading)
+│   ├── schema.sql           # Test database schema
+│   └── UpdateStockTest.php  # Tests for core stock operations
+│
 ├── src/                     # Frontend libraries (Bootstrap, jQuery, jQuery-UI)
 ├── system/                  # Backend API handler and logging
 │   ├── api_handler.php      # SQL query execution endpoint
@@ -79,7 +93,7 @@
 
 ## Database
 
-**Connection**: Configured in `connect.php` using MySQLi with hardcoded credentials.
+**Connection**: Configured in `connect.php` using MySQLi. Credentials are loaded from `.env` (via phpdotenv) with hardcoded fallback defaults.
 
 ### Key Tables
 
@@ -141,23 +155,69 @@ Both go through `handleStock()` / `handleStock2()` -> `updateStock()` in `functi
 
 ## Build & Development
 
-### No Build System
-This project has no build tools, bundlers, or package managers. PHP files are served directly.
+### Prerequisites
+- PHP >= 8.0 with extensions: `mysqli`, `gd`
+- MySQL database
+- Composer
+- Apache web server with `.htaccess` support
 
-### No Testing Framework
-There are no automated tests (no PHPUnit, no Jest, no test directories).
+### Setup
 
-### No Linting/Formatting
-No configured linting or formatting tools.
+```bash
+# Install PHP dependencies
+composer install
 
-### No CI/CD
-No CI/CD pipeline configured.
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your database credentials
+```
 
-### Running Locally
-The application requires:
-1. A PHP-capable web server (Apache with `.htaccess` support)
-2. MySQL database with the schema tables created
-3. PHP extensions: `mysqli`, `gd` (for QR code generation)
+### Linting (PHP_CodeSniffer)
+
+```bash
+# Check for code style issues (PSR-12 base)
+composer lint
+
+# Auto-fix fixable issues
+composer lint:fix
+```
+
+Configuration: `phpcs.xml` (PSR-12 with relaxed rules for procedural PHP). Third-party libraries are excluded.
+
+### Testing (PHPUnit)
+
+```bash
+# Run all tests
+composer test
+```
+
+Tests require a MySQL test database. Configure credentials in `phpunit.xml` or via environment variables. Load the schema with:
+
+```bash
+mysql -u root -p zaikokanri_test < tests/schema.sql
+```
+
+Test files live in `tests/`. Current coverage:
+- `UpdateStockTest.php` - Core stock operations (restock, destock, history logging, barcode flag, batch operations)
+
+### CI/CD (GitHub Actions)
+
+The CI pipeline (`.github/workflows/ci.yml`) runs on pushes and PRs to `main`:
+- **Lint job**: Installs dependencies, runs `composer lint`
+- **Test job**: Spins up MySQL 8.0 service, loads schema, runs `composer test`
+
+### Environment Variables
+
+Database credentials are configured via `.env` file (loaded by phpdotenv in `connect.php`):
+
+| Variable | Description | Default fallback |
+|----------|-------------|-----------------|
+| `DB_HOST` | MySQL host | `localhost` |
+| `DB_USER` | MySQL username | `eeismzak` |
+| `DB_PASSWORD` | MySQL password | `zaikokanrimysql` |
+| `DB_NAME` | MySQL database name | `eeismzak` |
+
+Copy `.env.example` to `.env` and fill in your values. The `.env` file is gitignored.
 
 ### Access Control
 `.htaccess` restricts access by IP (`133.1.0.0/16`).
@@ -175,11 +235,12 @@ The sidebar (`navbar.php`) links to:
 ## Important Notes for AI Assistants
 
 - **Language**: UI text and database values are in Japanese. Preserve Japanese strings when editing.
-- **No `.env`**: Database credentials are hardcoded in `connect.php`. Do not commit real credentials.
+- **Environment**: Database credentials come from `.env` (with hardcoded fallbacks in `connect.php`). Never commit `.env` files.
 - **Global state**: The `$con` database connection is accessed via `global $con` in functions.
 - **File organization**: All PHP pages are in the root directory. There is no MVC framework.
 - **Security caution**: `system/api_handler.php` accepts arbitrary SQL queries. Avoid extending this pattern.
 - **Prepared statements**: Always use MySQLi prepared statements with `bind_param()` for new queries.
-- **No composer autoload**: Libraries are included manually with `require`/`require_once`.
+- **Testing**: Add tests to `tests/` for new business logic. Run `composer test` to verify.
+- **Linting**: Run `composer lint` before committing. Fix issues with `composer lint:fix`.
 - **Audio files**: Stock operations play audio feedback (`.wav` files in root). These are referenced in `functions.php`.
 - **Third-party libraries** (`src/`, `phpqrcode/`, `phpbarcode/`, `tcpdf/`): Avoid modifying vendored code.
