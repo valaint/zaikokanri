@@ -4,28 +4,28 @@
     require_once 'csrf.php';
 
     // When form submitted, check and create user session.
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        validateCsrfToken();
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    validateCsrfToken();
 
-        $stmt = $con->prepare("SELECT * FROM `users` WHERE username=?");
-        $stmt->bind_param("s", $_POST['username']);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $rows = mysqli_num_rows($result);
+    $stmt = $con->prepare("SELECT * FROM `users` WHERE username=?");
+    $stmt->bind_param("s", $_POST['username']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $rows = mysqli_num_rows($result);
 
-        if ($rows == 1) {
-            $user = mysqli_fetch_assoc($result);
-            $passwordIsValid = password_verify($_POST['password'], $user['password']);
-            if ($passwordIsValid) {
-                $_SESSION['username'] = $_POST['username'];
-                header("Location: admin.php");
-            } else {
-                $errorMsg = "Incorrect Username/password.";
-            }
+    if ($rows == 1) {
+        $user = mysqli_fetch_assoc($result);
+        $passwordIsValid = password_verify($_POST['password'], $user['password']);
+        if ($passwordIsValid) {
+            $_SESSION['username'] = $_POST['username'];
+            header("Location: admin.php");
         } else {
             $errorMsg = "Incorrect Username/password.";
         }
+    } else {
+        $errorMsg = "Incorrect Username/password.";
     }
+}
 ?>
 <!DOCTYPE html>
 <html>

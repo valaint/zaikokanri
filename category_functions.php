@@ -36,4 +36,3 @@ switch ($action) {
 }
 
 $con->close();
-?>

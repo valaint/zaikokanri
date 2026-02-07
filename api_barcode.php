@@ -32,7 +32,7 @@ if (isset($input['barcodetext'])) {
                     $response[] = ['article_name' => $row[2], 'count' => $row[1]];
                 } else {
                     // handleStock returned false, add error message to response
-                    $response[] = ['error' => "出庫失敗しました ".$row[2]];
+                    $response[] = ['error' => "出庫失敗しました " . $row[2]];
                 }
             }
         }
@@ -44,4 +44,3 @@ if (isset($input['barcodetext'])) {
     http_response_code(400);
     echo json_encode(["error" => "No barcode provided"]);
 }
-?>

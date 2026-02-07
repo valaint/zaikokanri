@@ -45,31 +45,31 @@ $result3 = $con->query($sql3);
     <?php
     $last_barcode = null;
     $barcode_counts = [];
-    while($row = $result1->fetch_assoc()){
-      $barcode_counts[$row['barcode']][] = $row;
+    while ($row = $result1->fetch_assoc()) {
+        $barcode_counts[$row['barcode']][] = $row;
     }
-    foreach($barcode_counts as $barcode => $rows) {
-      $count = count($rows);
-      foreach($rows as $index => $row) {
-        echo '<tr>';
-        if ($index === 0) {
-          echo '<td rowspan="'.$count.'"><input type="text" class="form-control" value="'.$barcode.'"></td>';
-        }
-        echo '
+    foreach ($barcode_counts as $barcode => $rows) {
+        $count = count($rows);
+        foreach ($rows as $index => $row) {
+            echo '<tr>';
+            if ($index === 0) {
+                echo '<td rowspan="' . $count . '"><input type="text" class="form-control" value="' . $barcode . '"></td>';
+            }
+            echo '
         <td>
           <select class="form-control">';
-            foreach($articles as $id => $name) {
-              $selected = $id == $row["article_id"] ? "selected" : "";
-              echo '<option value="'.$id.'" '.$selected.'>'.$name.'</option>';
+            foreach ($articles as $id => $name) {
+                $selected = $id == $row["article_id"] ? "selected" : "";
+                echo '<option value="' . $id . '" ' . $selected . '>' . $name . '</option>';
             }
-        echo '
+            echo '
           </select>
         </td>
-        <td><input type="text" class="form-control" value="'.$row["destock_count"].'"></td>
-        <td><input type="checkbox" class="form-check-input" '.($row["is_prompt"] ? "checked" : "").'><input type="hidden" class="id-input" value="'.$row["id"].'"></td>
+        <td><input type="text" class="form-control" value="' . $row["destock_count"] . '"></td>
+        <td><input type="checkbox" class="form-check-input" ' . ($row["is_prompt"] ? "checked" : "") . '><input type="hidden" class="id-input" value="' . $row["id"] . '"></td>
         <td><button class="btn btn-primary">Update</button><button class="btn btn-danger">Delete</button></td>
         </tr>';
-      }
+        }
     }
     ?>
   </tbody>
@@ -87,12 +87,12 @@ $result3 = $con->query($sql3);
       </tr>
     </thead>
     <tbody>
-      <?php while($row = $result3->fetch_assoc()): ?>
+      <?php while ($row = $result3->fetch_assoc()) : ?>
       <tr>
         <td><input type="text" class="form-control" value="<?= $row["barcode"] ?>"></td>
         <td>
           <select class="form-control">
-            <?php foreach($articles as $id => $name): ?>
+            <?php foreach ($articles as $id => $name) : ?>
               <option value="<?= $id ?>" <?= $id == $row["article_id"] ? "selected" : "" ?>>
                 <?= $name ?>
               </option>
@@ -108,7 +108,7 @@ $result3 = $con->query($sql3);
         <td><input type="text" class="form-control"></td>
         <td>
           <select class="form-control">
-            <?php foreach($articles as $id => $name): ?>
+            <?php foreach ($articles as $id => $name) : ?>
               <option value="<?= $id ?>">
                 <?= $name ?>
               </option>
@@ -177,7 +177,15 @@ $(document).on('click', '.btn-danger', function() {
 
         $.post("barcode_functions.php", { action: "add", barcode: barcode, article_id: article_id, destock_count: destock_count, is_prompt: is_prompt }, function(response) {
             // The response should contain the new barcode
-            row.before('<tr><td><input type="text" class="form-control" value="' + response.barcode + '"></td><td><input type="text" class="form-control" value="' + article_id + '"></td><td><input type="text" class="form-control" value="' + destock_count + '"></td><td><input type="checkbox" class="form-check-input" ' + (is_prompt ? 'checked' : '') + '></td><td><button class="btn btn-primary">Update</button> <button class="btn btn-danger">Delete</button></td></tr>');
+            var newRow = '<tr>'
+                + '<td><input type="text" class="form-control" value="' + response.barcode + '"></td>'
+                + '<td><input type="text" class="form-control" value="' + article_id + '"></td>'
+                + '<td><input type="text" class="form-control" value="' + destock_count + '"></td>'
+                + '<td><input type="checkbox" class="form-check-input" ' + (is_prompt ? 'checked' : '') + '></td>'
+                + '<td><button class="btn btn-primary">Update</button>'
+                + ' <button class="btn btn-danger">Delete</button></td>'
+                + '</tr>';
+            row.before(newRow);
         }, "json")
         .done(function() {
             alert("Added successfully!");

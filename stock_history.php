@@ -9,15 +9,15 @@ if (isset($_GET['start_date']) && isset($_GET['end_date']) && isset($_GET['type'
 
     if ($type == "入庫") {
         $type_query = "AND type = '入庫'";
-    } else if ($type == "出庫") {
+    } elseif ($type == "出庫") {
         $type_query = "AND type = '出庫'";
     }
-$start_date_obj = DateTime::createFromFormat('m/d/Y', $start_date);
-$end_date_obj = DateTime::createFromFormat('m/d/Y', $end_date);
+    $start_date_obj = DateTime::createFromFormat('m/d/Y', $start_date);
+    $end_date_obj = DateTime::createFromFormat('m/d/Y', $end_date);
 
 // Convert to strings in 'Y-m-d' format
-$start_date_mysql = $start_date_obj->format('Y-m-d');
-$end_date_mysql = $end_date_obj->format('Y-m-d');
+    $start_date_mysql = $start_date_obj->format('Y-m-d');
+    $end_date_mysql = $end_date_obj->format('Y-m-d');
     $query = "";
     if ($group_by_article) {
         $query = "SELECT article_id, (SELECT article_name from article_info WHERE article_info.article_id=history.article_id) AS article_name, SUM(changed_value) AS total_changed_value, type 
@@ -33,7 +33,7 @@ $end_date_mysql = $end_date_obj->format('Y-m-d');
     }
 
 
-    
+
     $stmt = $con->prepare($query);
     $stmt->bind_param("ss", $start_date_mysql, $end_date_mysql);
     if (!$stmt->execute()) {
@@ -41,8 +41,6 @@ $end_date_mysql = $end_date_obj->format('Y-m-d');
     }
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
-
         echo "{$row['time']} {$row['article_name']} {$row['changed_value']}個{$row['type']}されました。<br>";
     }
 }
-?>

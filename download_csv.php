@@ -8,7 +8,7 @@ if (isset($_SESSION['csv_data'])) {
 
     // Open output stream
     $output = fopen('php://output', 'w');
-    if ($output === FALSE) {
+    if ($output === false) {
         die("Failed to open php://output");
     }
 
@@ -16,8 +16,8 @@ if (isset($_SESSION['csv_data'])) {
     header('Cache-Control: must-revalidate');
     header('Pragma: public');
     header('Content-Description: File Transfer');
-    header('Content-Disposition: attachment; filename="stock_'.$date.'.csv"');
-    header('Content-Type: text/csv; charset='.$encoding);
+    header('Content-Disposition: attachment; filename="stock_' . $date . '.csv"');
+    header('Content-Type: text/csv; charset=' . $encoding);
     header('Content-Transfer-Encoding: binary');
 
     if ($encoding === 'utf-8') {
@@ -27,7 +27,7 @@ if (isset($_SESSION['csv_data'])) {
     // Output all the data
     foreach ($csv_data as $row) {
         if ($encoding === 'shift-jis') {
-            $row = array_map(function($field) {
+            $row = array_map(function ($field) {
                 return mb_convert_encoding($field, 'Shift_JIS', 'UTF-8');
             }, $row);
         }
@@ -53,11 +53,10 @@ if (isset($_SESSION['csv_data'])) {
         // Close the temporary stream
         fclose($temp);
     }
-    
+
     // Close the stream
     fclose($output);
     exit();
 } else {
     die("Error: Data not found.");
 }
-?>

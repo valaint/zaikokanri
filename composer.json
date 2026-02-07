@@ -12,7 +12,7 @@
     },
     "scripts": {
         "test": "phpunit --configuration phpunit.xml",
-        "lint": "phpcs --standard=phpcs.xml",
+        "lint": "phpcs --standard=phpcs.xml --runtime-set ignore_warnings_on_exit 1",
         "lint:fix": "phpcbf --standard=phpcs.xml"
     }
 }

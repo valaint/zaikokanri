@@ -1,22 +1,24 @@
 <?php
 require_once('../connect.php');
 
-function log_to_file($filename, $data) {
+function log_to_file($filename, $data)
+{
     $fp = fopen($filename, 'a');
-    fwrite($fp, json_encode($data)."\n");
+    fwrite($fp, json_encode($data) . "\n");
     fclose($fp);
 }
 
-function log_from_file_to_db($filename) {
+function log_from_file_to_db($filename)
+{
     global $con;
     if (!file_exists($filename) || !is_readable($filename)) {
         return;
     }
     $contents = file($filename);
-    foreach($contents as $line) {
+    foreach ($contents as $line) {
         $log_data = json_decode($line, true);
         $log_type = $log_data['log_type'];
-        $log_function = 'log_'.$log_type;
+        $log_function = 'log_' . $log_type;
         if ($log_function($log_data, true) === false) {
             break;
         }
@@ -31,17 +33,23 @@ function log_from_file_to_db($filename) {
     }
 }
 
-function generate_uuid() {
-    return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-        mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+function generate_uuid()
+{
+    return sprintf(
+        '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+        mt_rand(0, 0xffff),
+        mt_rand(0, 0xffff),
         mt_rand(0, 0xffff),
         mt_rand(0, 0x0fff) | 0x4000,
         mt_rand(0, 0x3fff) | 0x8000,
-        mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        mt_rand(0, 0xffff),
+        mt_rand(0, 0xffff),
+        mt_rand(0, 0xffff)
     );
 }
 
-function log_api_request($log_data, $from_file = false) {
+function log_api_request($log_data, $from_file = false)
+{
     global $con;
 
     // Try to log the data from the file first
@@ -72,7 +80,8 @@ function log_api_request($log_data, $from_file = false) {
     }
 }
 
-function log_api_response($log_data, $from_file = false) {
+function log_api_response($log_data, $from_file = false)
+{
     global $con;
 
     // Try to log the data from the file first
@@ -90,7 +99,8 @@ function log_api_response($log_data, $from_file = false) {
     }
 }
 
-function log_api_exception($log_data, $from_file = false) {
+function log_api_exception($log_data, $from_file = false)
+{
     global $con;
 
     // Try to log the data from the file first
@@ -107,7 +117,3 @@ function log_api_exception($log_data, $from_file = false) {
         log_to_file('exception_log.txt', $log_data);
     }
 }
-?>
-
-
-

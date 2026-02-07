@@ -10,7 +10,7 @@ if (isset($_GET['start_date']) && isset($_GET['end_date']) && isset($_GET['type'
 
     if ($type == "入庫") {
         $type_query = "AND type = '入庫'";
-    } else if ($type == "出庫") {
+    } elseif ($type == "出庫") {
         $type_query = "AND type = '出庫'";
     }
 
@@ -51,14 +51,14 @@ if (isset($_GET['start_date']) && isset($_GET['end_date']) && isset($_GET['type'
         echo json_encode($data);
     } else {
         header('Content-Type: text/csv; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="report'.$start_date.'_'.$end_date.'.csv"');
+        header('Content-Disposition: attachment; filename="report' . $start_date . '_' . $end_date . '.csv"');
 
         // Open the output stream
         $fh = fopen('php://output', 'w');
-        
+
         // Output BOM for UTF-8
         fputs($fh, "\xEF\xBB\xBF");
-        
+
         // Start output buffering (to capture stream contents)
         ob_start();
 
@@ -78,9 +78,8 @@ if (isset($_GET['start_date']) && isset($_GET['end_date']) && isset($_GET['type'
 
         // Get the contents of the output buffer
         $string = ob_get_clean();
-        
+
         echo $string;
     }
     exit();
 }
-?>

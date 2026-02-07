@@ -27,4 +27,3 @@ foreach ($data as $article_id => $values) {
 
 // Redirect back to the admin page
 header("Location: admin.php");
-?>

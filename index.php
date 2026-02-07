@@ -70,7 +70,11 @@ include('navbar.php');
                             </thead>
                             <tbody>
                             <?php
-                            $stmt = $con->prepare("SELECT (SELECT category_name from category WHERE article_info.category_id=category.category_id),article_name,stock,article_id from article_info ORDER BY category_id,article_order");
+                            $sql = "SELECT (SELECT category_name from category"
+                                . " WHERE article_info.category_id=category.category_id),"
+                                . "article_name,stock,article_id"
+                                . " from article_info ORDER BY category_id,article_order";
+                            $stmt = $con->prepare($sql);
                             $stmt->execute();
                             $result = $stmt->get_result();
                             while ($row = $result->fetch_row()) {
@@ -88,11 +92,18 @@ include('navbar.php');
                     </div>
                     <br>
                     <input type="hidden" id="hiddensubmit" name="">
-                    <input type="button" class="btn btn-primary btn-pill" onclick="Submitfrm(this)"; form=stockupdate name="restock" value="入庫"><input type="button" class="btn btn-primary btn-pill" onclick="Submitfrm(this)"; form=stockupdate name="destock" value="出庫">
+                    <input type="button" class="btn btn-primary btn-pill"
+                        onclick="Submitfrm(this)" form=stockupdate name="restock" value="入庫">
+                    <input type="button" class="btn btn-primary btn-pill"
+                        onclick="Submitfrm(this)" form=stockupdate name="destock" value="出庫">
                 </form>
                 <div class="stockhistory col-10 bd-callout-warning">
                     <?php
-                    $stmt = $con->prepare("SELECT time,(SELECT article_name from article_info WHERE article_info.article_id=history.article_id),changed_value,type from history ORDER by `time` desc LIMIT 30");
+                    $sql = "SELECT time,"
+                        . "(SELECT article_name from article_info"
+                        . " WHERE article_info.article_id=history.article_id),"
+                        . "changed_value,type from history ORDER by `time` desc LIMIT 30";
+                    $stmt = $con->prepare($sql);
                     $stmt->execute();
                     $result = $stmt->get_result();
                     while ($row = $result->fetch_row()) {

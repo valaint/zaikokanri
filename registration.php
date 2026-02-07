@@ -3,23 +3,23 @@
     include_once 'connect.php';
     require_once 'csrf.php';
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        validateCsrfToken();
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    validateCsrfToken();
 
-        $username = $_POST['username'];
-        $password = $_POST['password'];
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $stmt = $con->prepare("INSERT INTO `users` (username, password) VALUES (?, ?)");
-        $stmt->bind_param("ss", $username, $hashedPassword);
+    $stmt = $con->prepare("INSERT INTO `users` (username, password) VALUES (?, ?)");
+    $stmt->bind_param("ss", $username, $hashedPassword);
 
-        if ($stmt->execute()) {
-            $successMsg = "You are registered successfully.";
-        } else {
-            $errorMsg = "Something went wrong. Please try again.";
-        }
+    if ($stmt->execute()) {
+        $successMsg = "You are registered successfully.";
+    } else {
+        $errorMsg = "Something went wrong. Please try again.";
     }
+}
 ?>
 <!DOCTYPE html>
 <html>

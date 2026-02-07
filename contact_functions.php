@@ -1,7 +1,8 @@
 <?php
 include('connect.php');  // Include your database connection script
 
-function addContact($name, $email) {
+function addContact($name, $email)
+{
     global $con;
 
     // Sanitize and validate data before inserting into database
@@ -16,14 +17,15 @@ function addContact($name, $email) {
     }
 }
 
-function updateContact($contact_id, $name, $email) {
+function updateContact($contact_id, $name, $email)
+{
     global $con;
 
     // Sanitize and validate data before updating in the database
 
     $stmt = $con->prepare("UPDATE contact SET `name` = ?, email = ? WHERE contact_id = ?");
     $stmt->bind_param("ssi", $name, $email, $contact_id);
-    
+
 
     if ($stmt->execute()) {
         return true;
@@ -33,7 +35,8 @@ function updateContact($contact_id, $name, $email) {
     }
 }
 
-function deleteContact($contact_id) {
+function deleteContact($contact_id)
+{
     global $con;
 
     // Sanitize and validate data before deleting from the database
@@ -86,4 +89,3 @@ if (isset($_POST['action'])) {
             break;
     }
 }
-?>
