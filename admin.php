@@ -1,13 +1,16 @@
 <?php include_once 'admin_header.php'; ?>
 
-<?php 
+<?php
 
 $stmt_below_threshold = $con->prepare("SELECT article_name, stock, threshold FROM article_info WHERE stock <= threshold ORDER BY stock ASC");
 $stmt_below_threshold->execute();
 $result_below_threshold = $stmt_below_threshold->get_result();
 
 // Fetching data for Recent Activities
-$stmt_recent_activities = $con->prepare("SELECT h.type, h.time, h.original_value, h.updated_value, a.article_name FROM history h JOIN article_info a ON h.article_id = a.article_id ORDER BY h.time DESC LIMIT 5");
+$sql = "SELECT h.type, h.time, h.original_value, h.updated_value, a.article_name"
+    . " FROM history h JOIN article_info a ON h.article_id = a.article_id"
+    . " ORDER BY h.time DESC LIMIT 5";
+$stmt_recent_activities = $con->prepare($sql);
 $stmt_recent_activities->execute();
 $result_recent_activities = $stmt_recent_activities->get_result();
 
@@ -64,7 +67,7 @@ $(document).ready(function() {
             </thead>
             <tbody>
                 <?php $count = 0; ?>
-                <?php while($row = $result_below_threshold->fetch_assoc()): ?>
+                <?php while ($row = $result_below_threshold->fetch_assoc()) : ?>
                     <tr class="<?php echo ($count >= 5) ? 'extra-rows' : ''; ?>">
                         <td><?php echo $row['article_name']; ?></td>
                         <td><?php echo $row['stock']; ?></td>
@@ -74,7 +77,7 @@ $(document).ready(function() {
                 <?php endwhile; ?>
             </tbody>
         </table>
-        <?php if($count > 5): ?>
+        <?php if ($count > 5) : ?>
             <button id="loadMore" class="btn btn-primary">Load More</button>
         <?php endif; ?>
     </div>
@@ -100,7 +103,7 @@ $(document).ready(function() {
                 </tr>
             </thead>
             <tbody>
-                <?php while($row = $result_recent_activities->fetch_assoc()): ?>
+                <?php while ($row = $result_recent_activities->fetch_assoc()) : ?>
                     <tr>
                         <td><?php echo $row['article_name']; ?></td>
                         <td><?php echo $row['type']; ?></td>
@@ -122,7 +125,7 @@ $(document).ready(function() {
         <p>Total API Requests: <?= $data_api_requests['total_requests'] ?></p>
         <h5>Recent API Requests:</h5>
         <ul>
-            <?php while($row = mysqli_fetch_assoc($result_recent_api)): ?>
+            <?php while ($row = mysqli_fetch_assoc($result_recent_api)) : ?>
                 <li><?= $row['method'] ?> - <?= $row['url'] ?> (<?= $row['timestamp'] ?>)</li>
             <?php endwhile; ?>
         </ul>
@@ -134,7 +137,7 @@ $(document).ready(function() {
     <div class="card-header">Error Logs</div>
     <div class="card-body">
         <ul>
-            <?php while($row = mysqli_fetch_assoc($result_error_logs)): ?>
+            <?php while ($row = mysqli_fetch_assoc($result_error_logs)) : ?>
                 <li><?= $row['error_message'] ?> (<?= $row['timestamp'] ?>)</li>
             <?php endwhile; ?>
         </ul>

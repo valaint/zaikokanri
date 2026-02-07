@@ -36,10 +36,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <!-- Alert for the success message -->
-<?php if (isset($_SESSION['success_msg'])): ?>
+<?php if (isset($_SESSION['success_msg'])) : ?>
     <div class="alert alert-success">
-        <?php 
-        echo $_SESSION['success_msg']; 
+        <?php
+        echo $_SESSION['success_msg'];
         unset($_SESSION['success_msg']);  // unset the success message after displaying it
         ?>
     </div>

@@ -18,7 +18,7 @@ $result = $con->query("SELECT `contact_id`, `name`, `email` FROM `contact`");
             </tr>
         </thead>
         <tbody>
-            <?php while ($row = $result->fetch_assoc()): ?>
+            <?php while ($row = $result->fetch_assoc()) : ?>
             <tr>
                 <td><?php echo $row['contact_id']; ?></td>
                 <td><input type="text" class="form-control" value="<?php echo $row['name']; ?>"></td>
@@ -68,7 +68,11 @@ $(document).ready(function() {
 
     // Add function
     $("#add-btn").click(function() {
-        var newRow = $("<tr><td></td><td><input type='text' class='form-control'></td><td><input type='text' class='form-control'></td><td><button class='btn btn-primary confirm-btn'>Confirm</button></td><td><button class='btn btn-danger delete-btn'>Delete</button></td></tr>");
+        var newRow = $("<tr><td></td>"
+            + "<td><input type='text' class='form-control'></td>"
+            + "<td><input type='text' class='form-control'></td>"
+            + "<td><button class='btn btn-primary confirm-btn'>Confirm</button></td>"
+            + "<td><button class='btn btn-danger delete-btn'>Delete</button></td></tr>");
         $("#contacts-table").append(newRow);
     });
 

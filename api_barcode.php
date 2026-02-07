@@ -27,12 +27,12 @@ if (isset($input['barcodetext'])) {
             $response[] = ['error' => "物品リストにありません $barcode"];
         } else {
             while ($row = $result->fetch_row()) {
-                if (handleStock2('destock', null, $row[0], $row[1],1)) {
+                if (handleStock('destock', null, $row[0], $row[1], 1, false)) {
                     // Add each destocked article, its count and name to the response
                     $response[] = ['article_name' => $row[2], 'count' => $row[1]];
                 } else {
                     // handleStock returned false, add error message to response
-                    $response[] = ['error' => "出庫失敗しました ".$row[2]];
+                    $response[] = ['error' => "出庫失敗しました " . $row[2]];
                 }
             }
         }
@@ -44,4 +44,3 @@ if (isset($input['barcodetext'])) {
     http_response_code(400);
     echo json_encode(["error" => "No barcode provided"]);
 }
-?>

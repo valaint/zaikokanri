@@ -51,20 +51,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($barcodes as $barcode) {
         $article_names = explode(',', $barcode['article_name']);
         $destock_counts = explode(',', $barcode['destock_count']);
-        for ($i = 0; $i < count($article_names); $i++){
+        for ($i = 0; $i < count($article_names); $i++) {
             $table .= '<tr>';
             if ($rowNum % 2 == 0) {
-                if ($i == 0){
-                    $table .= '<td style="vertical-align:middle;" rowspan="'.count($article_names).'"><div style="text-align:center;">'. htmlspecialchars($barcode['barcode']) . '</div></td>';
-                    $table .= '<td style="vertical-align:middle;" rowspan="'.count($article_names).'"><div style="text-align:center;"><img src="' . $barcode['qr_file'] . '" width="60" height="60"></div></td>';
+                if ($i == 0) {
+                    $table .= '<td style="vertical-align:middle;" rowspan="' . count($article_names) . '"><div style="text-align:center;">' . htmlspecialchars($barcode['barcode']) . '</div></td>';
+                    $rs = count($article_names);
+                    $qr = $barcode['qr_file'];
+                    $table .= '<td style="vertical-align:middle;" rowspan="' . $rs . '">'
+                        . '<div style="text-align:center;"><img src="' . $qr . '" width="60" height="60">'
+                        . '</div></td>';
                 }
-                $table .= '<td style="vertical-align:middle;"><div style="text-align:center;">' . htmlspecialchars($article_names[$i]) . '</div></td>';
-                $table .= '<td style="vertical-align:middle;"><div style="text-align:center;">' . htmlspecialchars($destock_counts[$i]) . '</div></td>';
+                $table .= '<td style="vertical-align:middle;"><div style="text-align:center;">'
+                    . htmlspecialchars($article_names[$i]) . '</div></td>';
+                $table .= '<td style="vertical-align:middle;"><div style="text-align:center;">'
+                    . htmlspecialchars($destock_counts[$i]) . '</div></td>';
             } else {
                 // QR code in the first column
                 if ($i == 0) {
-                    $table .= '<td style="vertical-align:middle;" rowspan=' . count($article_names) . '><div style="text-align:center;"><img src="' . $barcode['qr_file'] . '" width="60" height="60"></div></td>';
-                    $table .= '<td style="vertical-align:middle;" rowspan=' . count($article_names) . '><div style="text-align:center;">' . htmlspecialchars($barcode['barcode']) . '</div></td>';
+                    $rs = count($article_names);
+                    $qr = $barcode['qr_file'];
+                    $table .= '<td style="vertical-align:middle;" rowspan=' . $rs . '>'
+                        . '<div style="text-align:center;"><img src="' . $qr . '" width="60" height="60">'
+                        . '</div></td>';
+                    $table .= '<td style="vertical-align:middle;" rowspan=' . $rs . '>'
+                        . '<div style="text-align:center;">' . htmlspecialchars($barcode['barcode'])
+                        . '</div></td>';
                 }
                 $table .= '<td style="vertical-align:middle;"><div style="text-align:center;">' . htmlspecialchars($article_names[$i]) . '</div></td>';
                 $table .= '<td style="vertical-align:middle;"><div style="text-align:center;">' . htmlspecialchars($destock_counts[$i]) . '</div></td>';
@@ -104,14 +116,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <th>Article Name</th>
                 <th>Destock Count</th>
             </tr>
-            <?php foreach ($barcodes as $barcode): ?>
+            <?php foreach ($barcodes as $barcode) : ?>
                 <?php
                 $article_names = explode(',', $barcode['article_name']);
                 $destock_counts = explode(',', $barcode['destock_count']);
-                for ($i = 0; $i < count($article_names); $i++):
+                for ($i = 0; $i < count($article_names); $i++) :
                     ?>
                     <tr>
-                        <?php if ($i == 0): // Only print barcode and QR code for the first row ?>
+                        <?php if ($i == 0) : // Only print barcode and QR code for the first row ?>
                             <td rowspan="<?= count($article_names) ?>"><?= htmlspecialchars($barcode['barcode']) ?></td>
                             <td rowspan="<?= count($article_names) ?>"><img src="<?= htmlspecialchars($barcode['qr_file']) ?>"></td>
                         <?php endif; ?>

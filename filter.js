@@ -1,4 +1,5 @@
-function filterTable() {
+function filterTable()
+{
     // Variables
     let dropdown, table, rows, cells, category, filter;
     dropdown = document.getElementById("categorylist");
@@ -13,8 +14,7 @@ function filterTable() {
         // if the filter is set to 'All', or this is the header row, or 2nd `td` text matches filter
         if (filter === "All" || !category || (filter === category.textContent)) {
             row.style.display = ""; // shows this row
-        }
-        else {
+        } else {
             row.style.display = "none"; // hides this row
         }
     }

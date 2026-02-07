@@ -1,4 +1,4 @@
-<?php 
+<?php
 include_once 'admin_header.php';
 
 // Fetch all distinct dates from stock_log for the dropdown
@@ -14,9 +14,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['date']) && $_POST['confirm'] == '棚卸前に復元') {
         $date = $_POST['date'];
         $stock_column = 'original_stock';
-        
+
         restore_stock($con, $date, $stock_column);
-    } else if ($_POST['date'] && $_POST['confirm'] == '棚卸後に復元') {
+    } elseif ($_POST['date'] && $_POST['confirm'] == '棚卸後に復元') {
         $date = $_POST['date'];
         $stock_column = 'updated_stock';
 
@@ -24,7 +24,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-function restore_stock($con, $date, $stock_column) {
+function restore_stock($con, $date, $stock_column)
+{
     // Fetch all rows from stock_log for the selected date
     $stmt = $con->prepare("SELECT article_id, $stock_column FROM stock_log WHERE date = ?");
     $stmt->bind_param("s", $date);
@@ -50,7 +51,7 @@ function restore_stock($con, $date, $stock_column) {
         <div class="form-group mb-2">
             <label for="date" class="sr-only">Date:</label>
             <select id="date" name="date" class="form-control">
-                <?php foreach ($dates as $date): ?>
+                <?php foreach ($dates as $date) : ?>
                     <option value="<?php echo $date; ?>"><?php echo $date; ?></option>
                 <?php endforeach; ?>
             </select>
@@ -77,10 +78,10 @@ function restore_stock($con, $date, $stock_column) {
         $stmt->bind_param("s", $date);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         $csv_data = [];
         $csv_data[] = ["物品名", "棚卸前", "棚卸後", "現在の個数"];
-        
+
         while ($row = $result->fetch_assoc()) {
             echo "<tr>
                     <td>{$row['article_name']}</td>
@@ -88,7 +89,7 @@ function restore_stock($con, $date, $stock_column) {
                     <td>{$row['updated_stock']}</td>
                     <td>{$row['stock']}</td>
                   </tr>";
-                  
+
             $csv_data[] = [$row['article_name'], $row['original_stock'], $row['updated_stock'], $row['stock']];
         }
 

@@ -21,7 +21,7 @@ if ($con->error) {
     </tr>
   </thead>
   <tbody>
-    <?php while($row = $result->fetch_assoc()): ?>
+    <?php while ($row = $result->fetch_assoc()) : ?>
       <tr>
         <td><?= $row["category_id"] ?></td>
         <td><input type="text" class="form-control" value="<?= $row["category_name"] ?>"></td>
@@ -85,7 +85,11 @@ $(document).ready(function() {
 
         $.post("category_functions.php", { action: "add", category_id: category_id, category_name: category_name }, function(response) {
             // The response should contain the new category_id
-            row.before('<tr><td>' + response.category_id + '</td><td><input type="text" class="form-control" value="' + category_name + '"></td><td><button class="btn btn-primary">Update</button> <button class="btn btn-danger">Delete</button></td></tr>');
+            var newRow = '<tr><td>' + response.category_id + '</td>'
+                + '<td><input type="text" class="form-control" value="' + category_name + '"></td>'
+                + '<td><button class="btn btn-primary">Update</button>'
+                + ' <button class="btn btn-danger">Delete</button></td></tr>';
+            row.before(newRow);
         }, "json")
         .done(function() {
             alert("Added successfully!");

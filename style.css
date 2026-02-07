@@ -1,6 +1,51 @@
+/* Layout - shared by header.php and admin_header.php */
+.header-row {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.header-row h1 {
+    padding: 20px 0;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.sidebar {
+    height: 100vh;
+    padding: 20px 0;
+    overflow-y: auto;
+    background-color: #5D737E;
+    color: #D9D9D9;
+}
+
+.sidebar .nav-item {
+    padding: 5px 0;
+}
+
+.sidebar .nav-link {
+    color: #fff;
+    font-size: 1.25rem;
+}
+
+.sidebar .nav-link.active,
+.nav-link.active {
+    background-color: #64C9CF;
+    color: #1E1E1E;
+}
+
+.content {
+    padding: 20px;
+}
+
+/* Base styles */
 html, body {
     font-size: 18px;
     height: 100vh;
+}
+
+body {
+    font-family: "MS Pゴシック";
 }
 
 .container-fluid {
@@ -14,43 +59,25 @@ html, body {
     flex: 1 0 auto;
 }
 
-            .sidebar {
-            padding: 20px 0;
-            }
-            .sidebar .nav-link {
-            font-size: 1.25rem;
-            }
-            .sidebar {
-            background-color: #5D737E;  /* a shade of blue-gray */
-            color: #D9D9D9;  /* a light gray */
-            }
-            .nav-link.active {
-            background-color: #64C9CF;  /* a shade of light blue */
-            color: #1E1E1E;  /* almost black */
-            }
-
 .col-10 {
     display: flex;
     flex-direction: column;
 }
 
+/* Inventory table */
 .tableFixHead {
-    flex: 0 0 60%; /* Will not grow or shrink, base size is 60% */
+    flex: 0 0 60%;
     overflow-y: auto;
     max-height: 60vh;
 }
 
 .stockhistory {
-    flex: 0 0 40%; /* Will not grow or shrink, base size is 40% */
+    flex: 0 0 40%;
     overflow-y: auto;
     max-height: 40vh;
 }
 
-body {
-    font-family: "MS Pゴシック" ;
-}
-
-.tableFixHead table{
+.tableFixHead table {
     border-collapse: collapse;
     border-width: 2px;
     border: black;
@@ -63,15 +90,15 @@ body {
     background: black;
     border-collapse: collapse;
     color: white;
-    font-size:24px;
+    font-size: 24px;
 }
-
 
 .fixed_header thead tr {
     display: block;
-    table-layout:fixed;
+    table-layout: fixed;
 }
+
 td {
     padding: 5px;
-    font-size:20px;
+    font-size: 20px;
 }

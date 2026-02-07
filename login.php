@@ -1,37 +1,36 @@
 <?php
     session_start();
-    
-    // Include database configuration file
     include_once 'connect.php';
+    require_once 'csrf.php';
 
     // When form submitted, check and create user session.
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $stmt = $con->prepare("SELECT * FROM `users` WHERE username=?");
-        $stmt->bind_param("s", $_POST['username']);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $rows = mysqli_num_rows($result);
-        
-        if ($rows == 1) {
-            $user = mysqli_fetch_assoc($result);
-            $passwordIsValid = password_verify($_POST['password'], $user['password']);
-            if ($passwordIsValid) {
-                $_SESSION['username'] = $_POST['username'];
-                // Redirect to user dashboard page
-                header("Location: admin.php");
-            } else {
-                $errorMsg = "Incorrect Username/password.";
-            }
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    validateCsrfToken();
+
+    $stmt = $con->prepare("SELECT * FROM `users` WHERE username=?");
+    $stmt->bind_param("s", $_POST['username']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $rows = mysqli_num_rows($result);
+
+    if ($rows == 1) {
+        $user = mysqli_fetch_assoc($result);
+        $passwordIsValid = password_verify($_POST['password'], $user['password']);
+        if ($passwordIsValid) {
+            $_SESSION['username'] = $_POST['username'];
+            header("Location: admin.php");
         } else {
             $errorMsg = "Incorrect Username/password.";
         }
+    } else {
+        $errorMsg = "Incorrect Username/password.";
     }
+}
 ?>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Login</title>
-    <!-- CSS only -->
     <link rel="stylesheet" href="src/bootstrap.css">
 </head>
 <body>
@@ -39,12 +38,13 @@
         <div class="row justify-content-md-center">
             <div class="col-md-6">
                 <h2 class="text-center">Login</h2>
-                <?php if(isset($errorMsg)) { ?>
+                <?php if (isset($errorMsg)) { ?>
                     <div class="alert alert-danger" role="alert">
-                        <?php echo $errorMsg; ?>
+                        <?php echo htmlspecialchars($errorMsg); ?>
                     </div>
                 <?php } ?>
                 <form method="post" name="login">
+                    <?= csrfField() ?>
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input type="text" class="form-control" id="username" name="username" placeholder="Enter username">
@@ -58,7 +58,6 @@
             </div>
         </div>
     </div>
-    <!-- JS, Popper.js, and jQuery -->
     <script src="src/jquery.js"></script>
     <script src="src/bootstrap.bundle.js"></script>
 </body>

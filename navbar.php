@@ -12,7 +12,7 @@
                     'admin.php' => '在庫管理委員用'
                 );
                 $current_page = basename($_SERVER['SCRIPT_NAME']);
-                foreach($pages as $file => $name) {
+                foreach ($pages as $file => $name) {
                     $active = ($file == $current_page) ? 'active' : '';
                     echo "<li class='nav-item'><a class='nav-link {$active}' href='{$file}'>{$name}</a></li>";
                 }

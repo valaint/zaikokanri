@@ -44,10 +44,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Set font
     $pdf->AddFont('kozminproregular', '', 'kozminproregular.php');
     $pdf->SetFont('kozminproregular', '', 12, '', false);
-    
+
     // Create table headers
-    $table = '<table cellspacing="0" cellpadding="1" border="2" style="border-color:black;"><tr><th style="text-align:center;">種目</th><th style="text-align:center;">バーコード</th><th style="text-align:center;">品名</th><th style="text-align:center;">出庫単位</th><th style="text-align:center;">担当者</th></tr>';
-    
+    $table = '<table cellspacing="0" cellpadding="1" border="2" style="border-color:black;">'
+        . '<tr>'
+        . '<th style="text-align:center;">種目</th>'
+        . '<th style="text-align:center;">バーコード</th>'
+        . '<th style="text-align:center;">品名</th>'
+        . '<th style="text-align:center;">出庫単位</th>'
+        . '<th style="text-align:center;">担当者</th>'
+        . '</tr>';
+
     foreach ($barcodes as $barcode) {
         $table .= '<tr>';
         $table .= '<td style="border: 1px solid black; text-align:center; vertical-align:middle;">' . htmlspecialchars($barcode['category_name']) . '</td>';
@@ -89,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <th style="text-align:center;">担当者</th>
         
     </tr>
-    <?php foreach ($barcodes as $barcode): ?>
+    <?php foreach ($barcodes as $barcode) : ?>
         <tr>
         <td style="border: 1px solid black; text-align:center; vertical-align:middle;"><?= htmlspecialchars($barcode['category_name']) ?></td>
             <td style="border: 1px solid black; text-align:center; vertical-align:middle;"><img src="<?= htmlspecialchars($barcode['qr_file']) ?>"></td>

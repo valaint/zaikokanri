@@ -45,4 +45,3 @@ try {
 
 // Send the response
 echo json_encode($response);
-?>

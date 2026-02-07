@@ -1,0 +1,32 @@
+# Dependencies
+/vendor/
+node_modules/
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+request_log.txt
+response_log.txt
+exception_log.txt
+
+# Generated QR codes
+qrcodes/*.png
+
+# PHPUnit
+.phpunit.result.cache
+.phpunit.cache/
+
+# Composer
+composer.lock

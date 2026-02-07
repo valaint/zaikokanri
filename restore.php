@@ -21,7 +21,7 @@ if (isset($_POST['date']) && $_POST['confirm'] == 'yes') {
 
         echo "Stock restored successfully for Article ID: $article_id on Date: $date <br>";
     }
-} else if (isset($_POST['date']) && $_POST['confirm'] == 'no') {
+} elseif (isset($_POST['date']) && $_POST['confirm'] == 'no') {
     header("Location: index.php");  // Redirect to some other page
 } else {
     echo "No Date provided";
@@ -39,7 +39,7 @@ while ($row = $result->fetch_assoc()) {
 <form method="POST" action="">
     <label for="date">Date:</label>
     <select id="date" name="date">
-        <?php foreach ($dates as $date): ?>
+        <?php foreach ($dates as $date) : ?>
             <option value="<?php echo $date; ?>"><?php echo $date; ?></option>
         <?php endforeach; ?>
     </select>
