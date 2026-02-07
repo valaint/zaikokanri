@@ -1,16 +1,5 @@
 <?php
-include('connect.php');
-
-function logError($errorMessage, $query) {
-    global $con;
-
-    $stmt = $con->prepare("INSERT INTO error_log (error_message, query) VALUES (?, ?)");
-    $stmt->bind_param("ss", $errorMessage, $query);
-    if (!$stmt->execute()) {
-        // Log the error to PHP error log if the database logging fails.
-        error_log("Failed to log error to database: " . mysqli_error($con));
-    }
-}
+require_once('functions.php');
 
 $action = $_POST['action'];
 $category_id = $_POST['category_id'] ?? null;
@@ -41,7 +30,6 @@ switch ($action) {
             logError($stmt->error, $sql);
         } else {
             $last_id = $con->insert_id;
-            // After adding the new category, you may want to return its ID to the client
             echo json_encode(['category_id' => $last_id]);
         }
         break;

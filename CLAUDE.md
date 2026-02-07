@@ -20,15 +20,17 @@
 /
 ├── connect.php              # Database connection (MySQLi, uses .env)
 ├── functions.php            # Core business logic (handleStock, updateStock, logError)
-├── header.php / footer.php  # Shared HTML layout (user-facing)
-├── admin_header.php / admin_footer.php  # Admin layout
+├── csrf.php                 # CSRF token generation and validation
+├── health.php               # Health check endpoint (JSON)
+├── header.php / footer.php  # Shared HTML layout (user-facing, includes CSP headers)
+├── admin_header.php / admin_footer.php  # Admin layout (includes CSP headers)
 ├── navbar.php               # Sidebar navigation component
-├── style.css                # Global styles
+├── style.css                # Global styles (including layout extracted from headers)
 ├── .htaccess                # IP-based access restriction
 │
 ├── index.php                # Main stock management page (restock/destock)
-├── login.php                # User login
-├── registration.php         # User registration
+├── login.php                # User login (with CSRF)
+├── registration.php         # User registration (with CSRF, prepared statements)
 ├── logout.php               # Session destroy
 │
 ├── admin.php                # Admin dashboard (KPIs, alerts, logs)
@@ -43,7 +45,7 @@
 ├── barcode.php              # Barcode endpoint
 ├── barcode.js               # Barcode scanner input handler
 ├── api_barcode.php          # JSON API for barcode scanning
-├── barcode_functions.php    # Barcode CRUD functions
+├── barcode_functions.php    # Barcode CRUD endpoint (AJAX)
 ├── barcodeprint.php         # PDF barcode label generation
 │
 ├── count.php                # Stock history charts (Chart.js)
@@ -51,8 +53,8 @@
 ├── export_stock_history.php # JSON/CSV export of history
 ├── download_csv.php         # CSV export from session data
 │
-├── category_functions.php   # Category CRUD functions
-├── contact_functions.php    # Contact CRUD functions
+├── category_functions.php   # Category CRUD endpoint (AJAX)
+├── contact_functions.php    # Contact CRUD endpoint (AJAX, has function definitions)
 ├── delete_article.php       # Article deletion endpoint
 ├── update_article.php       # Bulk article update endpoint
 ├── update_order.php         # AJAX article display order update
@@ -65,6 +67,7 @@
 ├── popper.js                # Tooltip positioning library
 │
 ├── composer.json             # Composer config (PHPUnit, PHP_CodeSniffer, phpdotenv)
+├── Makefile                  # Convenience commands (make test, make lint, etc.)
 ├── phpunit.xml               # PHPUnit configuration
 ├── phpcs.xml                 # PHP_CodeSniffer rules (PSR-12 base)
 ├── .editorconfig             # Editor coding style consistency
@@ -79,7 +82,7 @@
 │
 ├── src/                     # Frontend libraries (Bootstrap, jQuery, jQuery-UI)
 ├── system/                  # Backend API handler and logging
-│   ├── api_handler.php      # SQL query execution endpoint
+│   ├── api_handler.php      # Read-only SQL query endpoint (SELECT only)
 │   ├── log_functions.php    # API request/response logging with UUID
 │   └── index.php            # System router
 ├── phpqrcode/               # QR code generation library
@@ -118,7 +121,21 @@ Two types of stock operations, tracked in `history`:
 - **入庫 (restock)**: Increases stock
 - **出庫 (destock)**: Decreases stock
 
-Both go through `handleStock()` / `handleStock2()` -> `updateStock()` in `functions.php`.
+Both go through `handleStock()` -> `updateStock()` in `functions.php`.
+
+## Security
+
+### CSRF Protection
+Forms in `login.php`, `registration.php` include CSRF tokens via `csrf.php`. Use `<?= csrfField() ?>` in forms and `validateCsrfToken()` on POST handlers.
+
+### Content-Security-Policy
+`header.php` and `admin_header.php` send CSP, X-Content-Type-Options, and X-Frame-Options headers.
+
+### API Handler
+`system/api_handler.php` is restricted to SELECT queries only, with blocked patterns for dangerous SQL keywords (SLEEP, BENCHMARK, INTO OUTFILE, etc.).
+
+### Prepared Statements
+All database queries use MySQLi prepared statements with `bind_param()`.
 
 ## Code Conventions
 
@@ -133,13 +150,14 @@ Both go through `handleStock()` / `handleStock2()` -> `updateStock()` in `functi
 - **Prepared statements** with `bind_param()` for all database queries
 - **Server-side rendering** - PHP generates HTML directly
 - **AJAX** via jQuery `$.post()` for dynamic operations (e.g., `update_order.php`)
-- **Function files** group related CRUD operations (`*_functions.php`)
+- **Function files** (`*_functions.php`) are AJAX endpoints that use shared `logError()` from `functions.php`
 - **Layout includes** via `require`/`include` for header, footer, navbar
 
 ### Session Management
 - `session_start()` at top of protected pages
 - Auth check: `if (!isset($_SESSION['username'])) { header("Location: login.php"); }`
 - Passwords hashed with `password_hash()` / `password_verify()`
+- CSRF tokens validated on form submissions via `csrf.php`
 
 ### Error Handling
 - Database errors logged to `error_log` table via `logError()` in `functions.php`
@@ -152,6 +170,7 @@ Both go through `handleStock()` / `handleStock2()` -> `updateStock()` in `functi
 - jQuery-UI for drag-and-drop sortable tables (article ordering in `admin_stock.php`)
 - Chart.js for stock history visualization
 - Audio feedback on stock operations (`.wav` files)
+- All shared layout styles in `style.css` (no inline `<style>` blocks in headers)
 
 ## Build & Development
 
@@ -164,22 +183,31 @@ Both go through `handleStock()` / `handleStock2()` -> `updateStock()` in `functi
 ### Setup
 
 ```bash
-# Install PHP dependencies
-composer install
+# Full setup (install deps + create .env)
+make setup
 
-# Set up environment variables
+# Or manually:
+composer install
 cp .env.example .env
 # Edit .env with your database credentials
 ```
 
+### Makefile Commands
+
+| Command | Description |
+|---------|-------------|
+| `make setup` | Install dependencies + create `.env` |
+| `make install` | Install Composer dependencies |
+| `make lint` | Run PHP_CodeSniffer |
+| `make lint-fix` | Auto-fix linting issues |
+| `make test` | Run PHPUnit tests |
+| `make ci` | Run full CI pipeline (lint + test) |
+
 ### Linting (PHP_CodeSniffer)
 
 ```bash
-# Check for code style issues (PSR-12 base)
-composer lint
-
-# Auto-fix fixable issues
-composer lint:fix
+composer lint       # Check for code style issues (PSR-12 base)
+composer lint:fix   # Auto-fix fixable issues
 ```
 
 Configuration: `phpcs.xml` (PSR-12 with relaxed rules for procedural PHP). Third-party libraries are excluded.
@@ -187,7 +215,6 @@ Configuration: `phpcs.xml` (PSR-12 with relaxed rules for procedural PHP). Third
 ### Testing (PHPUnit)
 
 ```bash
-# Run all tests
 composer test
 ```
 
@@ -205,6 +232,13 @@ Test files live in `tests/`. Current coverage:
 The CI pipeline (`.github/workflows/ci.yml`) runs on pushes and PRs to `main`:
 - **Lint job**: Installs dependencies, runs `composer lint`
 - **Test job**: Spins up MySQL 8.0 service, loads schema, runs `composer test`
+
+### Health Check
+
+`health.php` returns JSON with application and database status:
+```bash
+curl http://localhost/health.php
+```
 
 ### Environment Variables
 
@@ -238,9 +272,10 @@ The sidebar (`navbar.php`) links to:
 - **Environment**: Database credentials come from `.env` (with hardcoded fallbacks in `connect.php`). Never commit `.env` files.
 - **Global state**: The `$con` database connection is accessed via `global $con` in functions.
 - **File organization**: All PHP pages are in the root directory. There is no MVC framework.
-- **Security caution**: `system/api_handler.php` accepts arbitrary SQL queries. Avoid extending this pattern.
-- **Prepared statements**: Always use MySQLi prepared statements with `bind_param()` for new queries.
+- **Security**: Use prepared statements, CSRF tokens on forms, and never extend `system/api_handler.php` beyond SELECT.
 - **Testing**: Add tests to `tests/` for new business logic. Run `composer test` to verify.
 - **Linting**: Run `composer lint` before committing. Fix issues with `composer lint:fix`.
+- **CSRF**: Include `<?= csrfField() ?>` in new forms and call `validateCsrfToken()` in POST handlers.
+- **handleStock()**: The consolidated function supports both UI (with audio) and API (without audio) use via the `$play_audio` parameter.
 - **Audio files**: Stock operations play audio feedback (`.wav` files in root). These are referenced in `functions.php`.
 - **Third-party libraries** (`src/`, `phpqrcode/`, `phpbarcode/`, `tcpdf/`): Avoid modifying vendored code.

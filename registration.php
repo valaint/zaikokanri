@@ -1,17 +1,20 @@
 <?php
+    session_start();
     include_once 'connect.php';
+    require_once 'csrf.php';
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $username = mysqli_real_escape_string($con, $_POST['username']);
-        $password = mysqli_real_escape_string($con, $_POST['password']);
+        validateCsrfToken();
 
-        // Password hashing
+        $username = $_POST['username'];
+        $password = $_POST['password'];
+
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $query = "INSERT INTO `users` (username, password) VALUES ('$username', '$hashedPassword')";
-        $result = mysqli_query($con, $query);
+        $stmt = $con->prepare("INSERT INTO `users` (username, password) VALUES (?, ?)");
+        $stmt->bind_param("ss", $username, $hashedPassword);
 
-        if ($result) {
+        if ($stmt->execute()) {
             $successMsg = "You are registered successfully.";
         } else {
             $errorMsg = "Something went wrong. Please try again.";
@@ -29,17 +32,18 @@
         <div class="row justify-content-md-center">
             <div class="col-md-6">
                 <h2 class="text-center">Registration</h2>
-                <?php if(isset($successMsg)) { ?>
+                <?php if (isset($successMsg)) { ?>
                     <div class="alert alert-success" role="alert">
-                        <?php echo $successMsg; ?>
+                        <?php echo htmlspecialchars($successMsg); ?>
                     </div>
                 <?php } ?>
-                <?php if(isset($errorMsg)) { ?>
+                <?php if (isset($errorMsg)) { ?>
                     <div class="alert alert-danger" role="alert">
-                        <?php echo $errorMsg; ?>
+                        <?php echo htmlspecialchars($errorMsg); ?>
                     </div>
                 <?php } ?>
                 <form method="post" name="registration">
+                    <?= csrfField() ?>
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input type="text" class="form-control" id="username" name="username" placeholder="Enter username">

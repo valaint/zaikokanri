@@ -162,9 +162,9 @@ class UpdateStockTest extends TestCase
         $stmt->execute();
         $stmt->close();
 
-        // handleStock with array of changes
+        // handleStock with array of changes (play_audio=false for tests)
         $changes = ['1' => '5', '2' => '10'];
-        handleStock('restock', $changes);
+        handleStock('restock', $changes, null, null, 0, false);
 
         // Verify both articles updated
         $stmt = self::$con->prepare("SELECT stock FROM article_info WHERE article_id = ?");

@@ -1,16 +1,5 @@
 <?php
-include('connect.php');
-
-function logError($errorMessage, $query) {
-    global $con;
-
-    $stmt = $con->prepare("INSERT INTO error_log (error_message, query) VALUES (?, ?)");
-    $stmt->bind_param("ss", $errorMessage, $query);
-    if (!$stmt->execute()) {
-        // Log the error to PHP error log if the database logging fails.
-        error_log("Failed to log error to database: " . mysqli_error($con));
-    }
-}
+require_once('functions.php');
 
 $action = $_POST['action'];
 $id = $_POST['id'] ?? null;
@@ -43,7 +32,6 @@ switch ($action) {
         if (!$stmt->execute()) {
             logError($stmt->error, $sql);
         } else {
-            // After adding the new barcode, you may want to return its ID to the client
             echo json_encode(['barcode' => $barcode]);
         }
         break;
