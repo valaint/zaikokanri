@@ -1,62 +1,61 @@
--- Test database schema for zaikokanri
--- Run: mysql -u root -p zaikokanri_test < tests/schema.sql
+-- Test database schema for zaikokanri (SQLite)
 
 CREATE TABLE IF NOT EXISTS article_info (
-    article_id INT AUTO_INCREMENT PRIMARY KEY,
-    article_name VARCHAR(255) NOT NULL,
-    stock INT NOT NULL DEFAULT 0,
-    threshold INT NOT NULL DEFAULT 0,
-    category_id INT DEFAULT NULL,
-    contact_id INT DEFAULT NULL,
-    display_order INT DEFAULT 0
+    article_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    article_name TEXT NOT NULL,
+    stock INTEGER NOT NULL DEFAULT 0,
+    threshold INTEGER NOT NULL DEFAULT 0,
+    category_id INTEGER DEFAULT NULL,
+    contact_id INTEGER DEFAULT NULL,
+    display_order INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS history (
-    history_id INT AUTO_INCREMENT PRIMARY KEY,
-    article_id INT NOT NULL,
-    type VARCHAR(10) NOT NULL,
-    original_value INT NOT NULL,
-    updated_value INT NOT NULL,
-    from_barcode TINYINT NOT NULL DEFAULT 0,
+    history_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    article_id INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    original_value INTEGER NOT NULL,
+    updated_value INTEGER NOT NULL,
+    from_barcode INTEGER NOT NULL DEFAULT 0,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS error_log (
-    error_id INT AUTO_INCREMENT PRIMARY KEY,
+    error_id INTEGER PRIMARY KEY AUTOINCREMENT,
     error_message TEXT,
     query TEXT,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS category (
-    category_id INT AUTO_INCREMENT PRIMARY KEY,
-    category_name VARCHAR(255) NOT NULL
+    category_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    category_name TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS contact (
-    contact_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) DEFAULT NULL
+    contact_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
+    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS barcode_list (
-    barcode_id INT AUTO_INCREMENT PRIMARY KEY,
-    barcode VARCHAR(255) NOT NULL,
-    article_id INT NOT NULL,
-    destock_count INT NOT NULL DEFAULT 1,
-    is_prompt TINYINT NOT NULL DEFAULT 0
+    barcode_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    barcode TEXT NOT NULL,
+    article_id INTEGER NOT NULL,
+    destock_count INTEGER NOT NULL DEFAULT 1,
+    is_prompt INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS stock_log (
-    stock_log_id INT AUTO_INCREMENT PRIMARY KEY,
-    article_id INT NOT NULL,
-    original_stock INT NOT NULL,
-    updated_stock INT NOT NULL,
+    stock_log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    article_id INTEGER NOT NULL,
+    original_stock INTEGER NOT NULL,
+    updated_stock INTEGER NOT NULL,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

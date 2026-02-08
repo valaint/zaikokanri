@@ -1,4 +1,9 @@
 <?php
+// Allow test bootstrap to provide its own connection (e.g., SQLite)
+if (defined('TESTING_WITH_SQLITE')) {
+    return;
+}
+
 // Load environment variables from .env if available (via Composer autoload)
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';

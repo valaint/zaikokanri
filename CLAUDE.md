@@ -76,8 +76,9 @@
 ├── .github/workflows/ci.yml  # GitHub Actions CI pipeline
 │
 ├── tests/                   # PHPUnit test suite
-│   ├── bootstrap.php        # Test bootstrap (DB setup, function loading)
-│   ├── schema.sql           # Test database schema
+│   ├── bootstrap.php        # Test bootstrap (SQLite setup, function loading)
+│   ├── SqliteConnection.php # MySQLi-compatible SQLite wrapper for tests
+│   ├── schema.sql           # Test database schema (SQLite)
 │   └── UpdateStockTest.php  # Tests for core stock operations
 │
 ├── src/                     # Frontend libraries (Bootstrap, jQuery, jQuery-UI)
@@ -175,8 +176,8 @@ All database queries use MySQLi prepared statements with `bind_param()`.
 ## Build & Development
 
 ### Prerequisites
-- PHP >= 8.0 with extensions: `mysqli`, `gd`
-- MySQL database
+- PHP >= 8.0 with extensions: `mysqli`, `gd`, `pdo_sqlite` (for tests)
+- MySQL database (for production)
 - Composer
 - Apache web server with `.htaccess` support
 
@@ -218,11 +219,9 @@ Configuration: `phpcs.xml` (PSR-12 with relaxed rules for procedural PHP). Third
 composer test
 ```
 
-Tests require a MySQL test database. Configure credentials in `phpunit.xml` or via environment variables. Load the schema with:
+Tests use an **in-memory SQLite database** via a MySQLi-compatible wrapper (`tests/SqliteConnection.php`), so no MySQL server is needed to run tests. The wrapper implements the subset of the MySQLi API used by `functions.php` (`prepare`, `bind_param`, `execute`, `get_result`, `query`, `multi_query`).
 
-```bash
-mysql -u root -p zaikokanri_test < tests/schema.sql
-```
+The test bootstrap (`tests/bootstrap.php`) sets up the SQLite connection as `$GLOBALS['con']` and defines the `TESTING_WITH_SQLITE` constant, which causes `connect.php` to skip the MySQL connection.
 
 Test files live in `tests/`. Current coverage:
 - `UpdateStockTest.php` - Core stock operations (restock, destock, history logging, barcode flag, batch operations)
@@ -231,7 +230,7 @@ Test files live in `tests/`. Current coverage:
 
 The CI pipeline (`.github/workflows/ci.yml`) runs on pushes and PRs to `main`:
 - **Lint job**: Installs dependencies, runs `composer lint`
-- **Test job**: Spins up MySQL 8.0 service, loads schema, runs `composer test`
+- **Test job**: Runs `composer test` (uses in-memory SQLite, no MySQL required)
 
 ### Health Check
 

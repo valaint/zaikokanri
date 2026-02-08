@@ -4,7 +4,8 @@ use PHPUnit\Framework\TestCase;
 
 class UpdateStockTest extends TestCase
 {
-    private static mysqli $con;
+    /** @var SqliteConnection */
+    private static $con;
 
     public static function setUpBeforeClass(): void
     {

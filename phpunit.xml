@@ -10,10 +10,4 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
-    <php>
-        <env name="DB_HOST" value="127.0.0.1" force="true"/>
-        <env name="DB_USER" value="root" force="true"/>
-        <env name="DB_PASSWORD" value="test" force="true"/>
-        <env name="DB_NAME" value="zaikokanri_test" force="true"/>
-    </php>
 </phpunit>
