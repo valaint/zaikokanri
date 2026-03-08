@@ -7,14 +7,14 @@ error_reporting(E_ALL);
 // Get the posted data
 $data = $_POST['data'];
 
+// Prepare the update statement outside the loop
+$stmt = $con->prepare("UPDATE article_info SET contact_id1 = ?, stock = ?, threshold = ? WHERE article_id = ?");
+
 // Loop through each article_id
 foreach ($data as $article_id => $values) {
     $contact_id = $values['contact_id'];
     $stock = $values['stock'];
     $threshold = $values['threshold'];
-
-    // Prepare the update statement
-    $stmt = $con->prepare("UPDATE article_info SET contact_id1 = ?, stock = ?, threshold = ? WHERE article_id = ?");
 
     // Bind the parameters
     $stmt->bind_param("iiii", $contact_id, $stock, $threshold, $article_id);
