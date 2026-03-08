@@ -14,9 +14,9 @@ $_ENV['DB_PASSWORD'] = $_ENV['DB_PASSWORD'] ?? 'test';
 $_ENV['DB_NAME'] = $_ENV['DB_NAME'] ?? 'zaikokanri_test';
 
 // Load application code (functions.php -> connect.php -> sets up $con)
+global $con;
 require_once __DIR__ . '/../functions.php';
 
-global $con;
 if ($con->connect_error) {
     die("Test database connection failed: " . $con->connect_error . "\n"
         . "Make sure the test database is running and credentials in phpunit.xml are correct.\n");
