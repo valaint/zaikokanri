@@ -8,12 +8,16 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     }
 }
 
-$host = $_ENV['DB_HOST'] ?? 'localhost';
-$user = $_ENV['DB_USER'] ?? 'eeismzak';
-$password = $_ENV['DB_PASSWORD'] ?? 'zaikokanrimysql';
-$dbname = $_ENV['DB_NAME'] ?? 'eeismzak';
+$host = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?: 'localhost';
+$user = $_ENV['DB_USER'] ?? getenv('DB_USER') ?: 'eeismzak';
+$password = $_ENV['DB_PASSWORD'] ?? getenv('DB_PASSWORD') ?: 'zaikokanrimysql';
+$dbname = $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?: 'eeismzak';
 
-$con = new mysqli($host, $user, $password, $dbname);
+try {
+    $con = new mysqli($host, $user, $password, $dbname);
+} catch (mysqli_sql_exception $e) {
+    die("Connection failed: " . $e->getMessage());
+}
 
 if ($con->connect_error) {
     die("Connection failed: " . $con->connect_error);
