@@ -15,6 +15,9 @@ $dbname = $_ENV['DB_NAME'] ?? 'eeismzak';
 
 $con = new mysqli($host, $user, $password, $dbname);
 
+// Ensure $con is available globally, even when included from within a function scope (like in PHPUnit)
+$GLOBALS['con'] = $con;
+
 if ($con->connect_error) {
     die("Connection failed: " . $con->connect_error);
 }
