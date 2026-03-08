@@ -10,7 +10,7 @@ class UpdateStockTest extends TestCase
     {
         global $con;
         if ($con === null) {
-            require_once __DIR__ . '/../connect.php';
+            require __DIR__ . '/../connect.php';
         }
         self::$con = $con;
 
