@@ -13,7 +13,14 @@ $user = $_ENV['DB_USER'] ?? 'eeismzak';
 $password = $_ENV['DB_PASSWORD'] ?? 'zaikokanrimysql';
 $dbname = $_ENV['DB_NAME'] ?? 'eeismzak';
 
-$con = new mysqli($host, $user, $password, $dbname);
+// Ensure $con is available globally if this is required from within a function/method
+global $con;
+// Catch mysqli exceptions to properly populate connect_error in case of failure
+try {
+    $con = new mysqli($host, $user, $password, $dbname);
+} catch (mysqli_sql_exception $e) {
+    die("Connection failed: " . $e->getMessage());
+}
 
 if ($con->connect_error) {
     die("Connection failed: " . $con->connect_error);
