@@ -9,6 +9,9 @@ class UpdateStockTest extends TestCase
     public static function setUpBeforeClass(): void
     {
         global $con;
+        if ($con === null) {
+            require_once __DIR__ . '/../connect.php';
+        }
         self::$con = $con;
 
         // Create tables if they don't exist
