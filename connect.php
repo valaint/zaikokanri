@@ -13,6 +13,7 @@ $user = $_ENV['DB_USER'] ?? 'eeismzak';
 $password = $_ENV['DB_PASSWORD'] ?? 'zaikokanrimysql';
 $dbname = $_ENV['DB_NAME'] ?? 'eeismzak';
 
+global $con;
 $con = new mysqli($host, $user, $password, $dbname);
 
 if ($con->connect_error) {
