@@ -10,17 +10,21 @@ if (isset($_POST['date']) && $_POST['confirm'] == 'yes') {
     $stmt->execute();
     $result = $stmt->get_result();
 
+    $article_id = null;
+    $original_stock = null;
+    $update_stmt = $con->prepare("UPDATE article_info SET stock = ? WHERE article_id = ?");
+    $update_stmt->bind_param("ii", $original_stock, $article_id);
+
     while ($row = $result->fetch_assoc()) {
         $article_id = $row['article_id'];
         $original_stock = $row['original_stock'];
 
         // Update the current stock in article_info
-        $stmt = $con->prepare("UPDATE article_info SET stock = ? WHERE article_id = ?");
-        $stmt->bind_param("ii", $original_stock, $article_id);
-        $stmt->execute();
+        $update_stmt->execute();
 
         echo "Stock restored successfully for Article ID: $article_id on Date: $date <br>";
     }
+    $update_stmt->close();
 } elseif (isset($_POST['date']) && $_POST['confirm'] == 'no') {
     header("Location: index.php");  // Redirect to some other page
 } else {

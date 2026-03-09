@@ -20,16 +20,18 @@ if (isset($_GET['start_date']) && isset($_GET['end_date']) && isset($_GET['type'
     $end_date_mysql = $end_date_obj->format('Y-m-d');
     $query = "";
     if ($group_by_article) {
-        $query = "SELECT article_id, (SELECT article_name from article_info WHERE article_info.article_id=history.article_id) AS article_name, SUM(changed_value) AS total_changed_value, type 
-                               FROM history 
-                               WHERE `time` BETWEEN ? AND ? $type_query
-                               GROUP BY article_id, type
-                               ORDER by `time` DESC";
+        $query = "SELECT h.article_id, a.article_name, SUM(h.changed_value) AS total_changed_value, h.type
+                               FROM history h
+                               LEFT JOIN article_info a ON a.article_id = h.article_id
+                               WHERE h.`time` BETWEEN ? AND ? $type_query
+                               GROUP BY h.article_id, h.type
+                               ORDER by h.`time` DESC";
     } else {
-        $query = "SELECT time, (SELECT article_name from article_info WHERE article_info.article_id=history.article_id) AS article_name, changed_value, type 
-                               FROM history 
-                               WHERE `time` BETWEEN ? AND ? $type_query
-                               ORDER by `time` DESC";
+        $query = "SELECT h.time, a.article_name, h.changed_value, h.type
+                               FROM history h
+                               LEFT JOIN article_info a ON a.article_id = h.article_id
+                               WHERE h.`time` BETWEEN ? AND ? $type_query
+                               ORDER by h.`time` DESC";
     }
 
 
