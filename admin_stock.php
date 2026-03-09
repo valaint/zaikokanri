@@ -4,70 +4,103 @@
     background-color: yellow;
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
-$(function() {
-    $("#sortable").sortable({
-        update: function(event, ui) {
-            var order = {};
-            $('tr', this).each(function(index, element) {
-                var article_id = $(element).data('article-id');
-                order[article_id] = index;
-            });
+document.addEventListener("DOMContentLoaded", function() {
 
-            $.ajax({
-                url: 'update_order.php',
-                type: 'POST',
-                data: JSON.stringify(order),
-                contentType: 'application/json; charset=utf-8',
-                success: function(response) {
-                    console.log(response);
-                },
-                error: function(error) {
-                    console.log(error);
+    // Sortable via SortableJS instead of jQuery UI
+    var sortableList = document.getElementById('sortable');
+    if (sortableList) {
+        new Sortable(sortableList, {
+            animation: 150,
+            onUpdate: function (evt) {
+                var order = {};
+                var rows = sortableList.querySelectorAll('tr');
+                rows.forEach(function(row, index) {
+                    var article_id = row.getAttribute('data-article-id');
+                    if (article_id) {
+                        order[article_id] = index;
+                    }
+                });
+
+                fetch('update_order.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                    body: JSON.stringify(order)
+                })
+                .then(response => response.text())
+                .then(data => console.log(data))
+                .catch(error => console.log(error));
+            }
+        });
+    }
+
+    const searchInput = document.getElementById("searchArticle");
+    if (searchInput) {
+        searchInput.addEventListener("keyup", function() {
+            var value = this.value.toLowerCase();
+            var rows = document.querySelectorAll("#sortable tr");
+
+            rows.forEach(function(row) {
+                var firstCell = row.cells[0];
+                var articleName = firstCell.textContent.toLowerCase();
+                var matched = articleName.indexOf(value) > -1;
+
+                row.style.display = matched ? '' : 'none';
+
+                if (matched && value !== '') {
+                    var regex = new RegExp(value, 'gi');
+                    firstCell.innerHTML = articleName.replace(regex, function(match) {
+                        return "<span class='highlight'>" + match + "</span>";
+                    });
+                } else if (matched && value === '') {
+                    firstCell.innerHTML = articleName;
                 }
             });
-        }
-    }).disableSelection();
-    $("#searchArticle").on("keyup", function() {
-    var value = $(this).val().toLowerCase();
-    $("#articleTable tr").each(function() {
-        var articleName = $(this).find('td:first').text().toLowerCase(); // Target the first <td> which is "品名"
-        var matched = articleName.indexOf(value) > -1;
-        $(this).toggle(matched);
+        });
+    }
 
-        if (matched) {
-            var regex = new RegExp(value, 'gi');
-            // Highlight the matched text in the "品名" column
-            var highlightedText = articleName.replace(regex, function(match) {
-                return "<span class='highlight'>" + match + "</span>";
-            });
-            $(this).find('td:first').html(highlightedText);
+    const belowThresholdFilter = document.getElementById('belowThresholdFilter');
+    const outOfStockFilter = document.getElementById('outOfStockFilter');
+
+    function applyFilters() {
+        var rows = document.querySelectorAll("#sortable tr");
+        var belowChecked = belowThresholdFilter.checked;
+        var outOfChecked = outOfStockFilter.checked;
+
+        rows.forEach(function(row) {
+            var articleId = row.getAttribute('data-article-id');
+            var stockInput = row.querySelector('input[name="data[' + articleId + '][stock]"]');
+            var thresholdInput = row.querySelector('input[name="data[' + articleId + '][threshold]"]');
+
+            if (!stockInput || !thresholdInput) return;
+
+            var articleStock = parseInt(stockInput.value, 10);
+            var articleThreshold = parseInt(thresholdInput.value, 10);
+
+            if (belowChecked && articleStock > articleThreshold) {
+                row.style.display = 'none';
+            } else if (outOfChecked && articleStock !== 0) {
+                row.style.display = 'none';
+            } else {
+                row.style.display = '';
+            }
+        });
+    }
+
+    if (belowThresholdFilter) belowThresholdFilter.addEventListener('change', applyFilters);
+    if (outOfStockFilter) outOfStockFilter.addEventListener('change', applyFilters);
+
+    document.body.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-primary')) {
+            var articleId = e.target.getAttribute('data-id');
+            if (articleId) {
+                // Fetch the article data based on the ID
+                // Populate the modal fields with the fetched data
+            }
         }
     });
 });
-
-$('#belowThresholdFilter, #outOfStockFilter').on('change', function() {
-    $("#articleTable tr").each(function() {
-        let articleStock = parseInt($(this).find('input[name="data[' + $(this).data('article-id') + '][stock]"]').val(), 10);
-        let articleThreshold = parseInt($(this).find('input[name="data[' + $(this).data('article-id') + '][threshold]"]').val(), 10);
-
-        if ($('#belowThresholdFilter').is(':checked') && articleStock > articleThreshold) {
-            $(this).hide();
-        } else if ($('#outOfStockFilter').is(':checked') && articleStock !== 0) {
-            $(this).hide();
-        } else {
-            $(this).show();
-        }
-    });
-});
-});
-$(document).on('click', '.btn-primary', function() {
-    var articleId = $(this).data('id');
-    // Fetch the article data based on the ID (e.g., using AJAX)
-    // Populate the modal fields with the fetched data
-});
-
-
 </script>
 
 <div class="container">

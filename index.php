@@ -39,20 +39,23 @@ include('navbar.php');
 
 
             <div class="col-10 bg-light p-3">
-                <div class="row">
-                    <div class="col-2">
-                        <select id="categorylist" oninput="filterTable()">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-auto">
+                        <select class="form-control" id="categorylist" oninput="filterTable()">
                             <option>All</option>
                             <?php
-                            $stmt = $con->prepare("SELECT category_name FROM category");
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<option>{$row['category_name']}</option>";
+                            $categories = getCategories();
+                            foreach ($categories as $category_name) {
+                                echo "<option>" . htmlspecialchars($category_name) . "</option>";
                             }
-                            $result->free();
                             ?>
                         </select>
+                    </div>
+                    <div class="col-auto">
+                        <input type="text" id="searchArticleList" class="form-control" placeholder="Search by name..." oninput="filterTable()">
+                    </div>
+                    <div class="col-auto ml-auto">
+                        <a href="download_csv.php" class="btn btn-outline-success">CSV出力</a>
                     </div>
                 </div>
 
@@ -70,22 +73,19 @@ include('navbar.php');
                             </thead>
                             <tbody>
                             <?php
-                            $sql = "SELECT (SELECT category_name from category"
-                                . " WHERE article_info.category_id=category.category_id),"
-                                . "article_name,stock,article_id"
-                                . " from article_info ORDER BY category_id,article_order";
-                            $stmt = $con->prepare($sql);
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            while ($row = $result->fetch_row()) {
+                            $inventory = getInventory();
+                            foreach ($inventory as $row) {
+                                $category_name = htmlspecialchars($row[0] ?? '');
+                                $article_name = htmlspecialchars($row[1] ?? '');
+                                $stock = htmlspecialchars($row[2] ?? '');
+                                $article_id = htmlspecialchars($row[3] ?? '');
                                 echo "<tr> 
-        <td>{$row[0]}</td>
-        <td>{$row[1]}</td>
-        <td>{$row[2]}</td>
-        <td><input type='number' form=stockupdate min='0' name={$row[3]} size=2></td>
+        <td>{$category_name}</td>
+        <td>{$article_name}</td>
+        <td>{$stock}</td>
+        <td><input type='number' form=stockupdate min='0' name='{$article_id}' size='2'></td>
         </tr>";
                             }
-                            $result->free();
                             ?>
                             </tbody>
                         </table>
@@ -99,17 +99,14 @@ include('navbar.php');
                 </form>
                 <div class="stockhistory col-10 bd-callout-warning">
                     <?php
-                    $sql = "SELECT time,"
-                        . "(SELECT article_name from article_info"
-                        . " WHERE article_info.article_id=history.article_id),"
-                        . "changed_value,type from history ORDER by `time` desc LIMIT 30";
-                    $stmt = $con->prepare($sql);
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    while ($row = $result->fetch_row()) {
-                        echo "{$row[0]} {$row[1]} {$row[2]}個{$row[3]}されました。<br>";
+                    $history = getRecentHistory();
+                    foreach ($history as $row) {
+                        $time = htmlspecialchars($row[0] ?? '');
+                        $article_name = htmlspecialchars($row[1] ?? '');
+                        $changed_value = htmlspecialchars($row[2] ?? '');
+                        $type = htmlspecialchars($row[3] ?? '');
+                        echo "{$time} {$article_name} {$changed_value}個{$type}されました。<br>";
                     }
-                    $result->free();
                     echo "<br>";
                     ?>
                 </div>

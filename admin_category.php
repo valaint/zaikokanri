@@ -43,60 +43,81 @@ include_once 'admin_footer.php';
 ?>
 
 <script>
-$(document).ready(function() {
+document.addEventListener("DOMContentLoaded", function() {
 
-    // Update function
-    $(document).on('click', '.btn-primary', function() {
-    var row = $(this).closest("tr");
-    var category_id = row.find("td:nth-child(1)").text();
-    var category_name = row.find("td:nth-child(2)").find("input").val();
-
-    $.post("category_functions.php", { action: "update", category_id: category_id, category_name: category_name })
-        .done(function(data) {
-            console.log("Response:", data);
-            alert("Updated successfully!");
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.error("Error:", textStatus, errorThrown);
-            alert("Error updating entry.");
+    function postData(url, data) {
+        const formData = new URLSearchParams();
+        for (const key in data) {
+            formData.append(key, data[key]);
+        }
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
         });
-    });
+    }
 
-    // Delete function
-    $(document).on('click', '.btn-danger', function() {
-    var row = $(this).closest("tr");
-    var category_id = row.find("td:nth-child(1)").text();
+    document.querySelector(".table-bordered").addEventListener("click", function(e) {
+        const target = e.target;
 
-    $.post("category_functions.php", { action: "delete", category_id: category_id })
-        .done(function() {
-            row.remove();
-            alert("Deleted successfully!");
-        })
-        .fail(function() {
-            alert("Error deleting entry.");
-        });
-    });
+        // Update function
+        if (target.classList.contains("btn-primary") && target.textContent.trim() !== "追加") {
+            const row = target.closest("tr");
+            const category_id = row.cells[0].innerText.trim();
+            const category_name = row.cells[1].querySelector("input").value;
 
-    // Add function
-    $(document).on('click', '.btn-success', function() {
-        var row = $(this).closest("tr");
-        var category_id = row.find("td:nth-child(1)").text();
-        var category_name = row.find("td:nth-child(2)").find("input").val();
+            postData("category_functions.php", { action: "update", category_id: category_id, category_name: category_name })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Updated successfully!");
+                    } else {
+                        alert("Error updating entry.");
+                    }
+                })
+                .catch(err => alert("Error updating entry."));
+        }
 
-        $.post("category_functions.php", { action: "add", category_id: category_id, category_name: category_name }, function(response) {
-            // The response should contain the new category_id
-            var newRow = '<tr><td>' + response.category_id + '</td>'
-                + '<td><input type="text" class="form-control" value="' + category_name + '"></td>'
-                + '<td><button class="btn btn-primary">Update</button>'
-                + ' <button class="btn btn-danger">Delete</button></td></tr>';
-            row.before(newRow);
-        }, "json")
-        .done(function() {
-            alert("Added successfully!");
-        })
-        .fail(function() {
-            alert("Error adding entry.");
-        });
+        // Delete function
+        if (target.classList.contains("btn-danger")) {
+            const row = target.closest("tr");
+            const category_id = row.cells[0].innerText.trim();
+
+            postData("category_functions.php", { action: "delete", category_id: category_id })
+                .then(response => {
+                    if (response.ok) {
+                        row.remove();
+                        alert("Deleted successfully!");
+                    } else {
+                        alert("Error deleting entry.");
+                    }
+                })
+                .catch(err => alert("Error deleting entry."));
+        }
+
+        // Add function
+        if (target.classList.contains("btn-success")) {
+            const row = target.closest("tr");
+            const category_id = row.cells[0].innerText.trim();
+            const category_name = row.cells[1].querySelector("input").value;
+
+            postData("category_functions.php", { action: "add", category_id: category_id, category_name: category_name })
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.category_id) {
+                        const newRow = document.createElement("tr");
+                        newRow.innerHTML = `
+                            <td>${data.category_id}</td>
+                            <td><input type="text" class="form-control" value="${category_name}"></td>
+                            <td><button class="btn btn-primary">更新</button> <button class="btn btn-danger">削除</button></td>
+                        `;
+                        row.parentNode.insertBefore(newRow, row);
+                        alert("Added successfully!");
+                    } else {
+                        alert("Error adding entry.");
+                    }
+                })
+                .catch(err => alert("Error adding entry."));
+        }
     });
 });
 </script>
