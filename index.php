@@ -70,10 +70,10 @@ include('navbar.php');
                             </thead>
                             <tbody>
                             <?php
-                            $sql = "SELECT (SELECT category_name from category"
-                                . " WHERE article_info.category_id=category.category_id),"
-                                . "article_name,stock,article_id"
-                                . " from article_info ORDER BY category_id,article_order";
+                            $sql = "SELECT c.category_name, a.article_name, a.stock, a.article_id
+                                    FROM article_info a
+                                    LEFT JOIN category c ON a.category_id = c.category_id
+                                    ORDER BY a.category_id, a.article_order";
                             $stmt = $con->prepare($sql);
                             $stmt->execute();
                             $result = $stmt->get_result();
@@ -99,10 +99,10 @@ include('navbar.php');
                 </form>
                 <div class="stockhistory col-10 bd-callout-warning">
                     <?php
-                    $sql = "SELECT time,"
-                        . "(SELECT article_name from article_info"
-                        . " WHERE article_info.article_id=history.article_id),"
-                        . "changed_value,type from history ORDER by `time` desc LIMIT 30";
+                    $sql = "SELECT h.time, a.article_name, h.changed_value, h.type
+                            FROM history h
+                            LEFT JOIN article_info a ON h.article_id = a.article_id
+                            ORDER BY h.time DESC LIMIT 30";
                     $stmt = $con->prepare($sql);
                     $stmt->execute();
                     $result = $stmt->get_result();
