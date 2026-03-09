@@ -120,6 +120,15 @@ document.addEventListener("DOMContentLoaded", function() {
             </thead>
             <tbody id="sortable">
                 <?php
+                $contact_stmt = $con->prepare("SELECT contact_id, name FROM contact");
+                $contact_stmt->execute();
+                $contact_result = $contact_stmt->get_result();
+                $contacts = [];
+                while ($contact_row = $contact_result->fetch_assoc()) {
+                    $contacts[] = $contact_row;
+                }
+                $contact_result->free();
+
                 $stmt = $con->prepare("SELECT article_info.article_id, article_info.article_name, contact.name, contact.contact_id, article_info.stock, article_info.threshold 
                                        FROM article_info 
                                        JOIN contact ON article_info.contact_id1 = contact.contact_id
@@ -132,15 +141,11 @@ document.addEventListener("DOMContentLoaded", function() {
                         <td>
                             <select class='form-control' name='data[{$row['article_id']}][contact_id]'>";
 
-                    // Fetch all contacts and create an option for each one
-                    $contact_stmt = $con->prepare("SELECT contact_id, name FROM contact");
-                    $contact_stmt->execute();
-                    $contact_result = $contact_stmt->get_result();
-                    while ($contact_row = $contact_result->fetch_assoc()) {
+                    // Create an option for each one using the pre-fetched contacts
+                    foreach ($contacts as $contact_row) {
                         $selected = ($contact_row['contact_id'] == $row['contact_id']) ? "selected='selected'" : "";
                         echo "<option value='{$contact_row['contact_id']}' {$selected}>{$contact_row['name']}</option>";
                     }
-                    $contact_result->free();
 
                     echo "</select>
                         </td>

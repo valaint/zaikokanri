@@ -79,6 +79,14 @@ include('navbar.php');
                                 $article_name = htmlspecialchars($row[1] ?? '');
                                 $stock = htmlspecialchars($row[2] ?? '');
                                 $article_id = htmlspecialchars($row[3] ?? '');
+                            $sql = "SELECT c.category_name, a.article_name, a.stock, a.article_id
+                                    FROM article_info a
+                                    LEFT JOIN category c ON a.category_id = c.category_id
+                                    ORDER BY a.category_id, a.article_order";
+                            $stmt = $con->prepare($sql);
+                            $stmt->execute();
+                            $result = $stmt->get_result();
+                            while ($row = $result->fetch_row()) {
                                 echo "<tr> 
         <td>{$category_name}</td>
         <td>{$article_name}</td>
@@ -99,13 +107,15 @@ include('navbar.php');
                 </form>
                 <div class="stockhistory col-10 bd-callout-warning">
                     <?php
-                    $history = getRecentHistory();
-                    foreach ($history as $row) {
-                        $time = htmlspecialchars($row[0] ?? '');
-                        $article_name = htmlspecialchars($row[1] ?? '');
-                        $changed_value = htmlspecialchars($row[2] ?? '');
-                        $type = htmlspecialchars($row[3] ?? '');
-                        echo "{$time} {$article_name} {$changed_value}個{$type}されました。<br>";
+                    $sql = "SELECT h.time, a.article_name, h.changed_value, h.type
+                            FROM history h
+                            LEFT JOIN article_info a ON h.article_id = a.article_id
+                            ORDER BY h.time DESC LIMIT 30";
+                    $stmt = $con->prepare($sql);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    while ($row = $result->fetch_row()) {
+                        echo "{$row[0]} {$row[1]} {$row[2]}個{$row[3]}されました。<br>";
                     }
                     echo "<br>";
                     ?>
