@@ -39,20 +39,23 @@ include('navbar.php');
 
 
             <div class="col-10 bg-light p-3">
-                <div class="row">
-                    <div class="col-2">
-                        <select id="categorylist" oninput="filterTable()">
+                <div class="row mb-3 align-items-center">
+                    <div class="col-auto">
+                        <select class="form-control" id="categorylist" oninput="filterTable()">
                             <option>All</option>
                             <?php
-                            $stmt = $con->prepare("SELECT category_name FROM category");
-                            $stmt->execute();
-                            $result = $stmt->get_result();
-                            while ($row = $result->fetch_assoc()) {
-                                echo "<option>{$row['category_name']}</option>";
+                            $categories = getCategories();
+                            foreach ($categories as $category_name) {
+                                echo "<option>" . htmlspecialchars($category_name) . "</option>";
                             }
-                            $result->free();
                             ?>
                         </select>
+                    </div>
+                    <div class="col-auto">
+                        <input type="text" id="searchArticleList" class="form-control" placeholder="Search by name..." oninput="filterTable()">
+                    </div>
+                    <div class="col-auto ml-auto">
+                        <a href="download_csv.php" class="btn btn-outline-success">CSV出力</a>
                     </div>
                 </div>
 
@@ -70,6 +73,12 @@ include('navbar.php');
                             </thead>
                             <tbody>
                             <?php
+                            $inventory = getInventory();
+                            foreach ($inventory as $row) {
+                                $category_name = htmlspecialchars($row[0] ?? '');
+                                $article_name = htmlspecialchars($row[1] ?? '');
+                                $stock = htmlspecialchars($row[2] ?? '');
+                                $article_id = htmlspecialchars($row[3] ?? '');
                             $sql = "SELECT c.category_name, a.article_name, a.stock, a.article_id
                                     FROM article_info a
                                     LEFT JOIN category c ON a.category_id = c.category_id
@@ -79,13 +88,12 @@ include('navbar.php');
                             $result = $stmt->get_result();
                             while ($row = $result->fetch_row()) {
                                 echo "<tr> 
-        <td>{$row[0]}</td>
-        <td>{$row[1]}</td>
-        <td>{$row[2]}</td>
-        <td><input type='number' form=stockupdate min='0' name={$row[3]} size=2></td>
+        <td>{$category_name}</td>
+        <td>{$article_name}</td>
+        <td>{$stock}</td>
+        <td><input type='number' form=stockupdate min='0' name='{$article_id}' size='2'></td>
         </tr>";
                             }
-                            $result->free();
                             ?>
                             </tbody>
                         </table>
@@ -109,7 +117,6 @@ include('navbar.php');
                     while ($row = $result->fetch_row()) {
                         echo "{$row[0]} {$row[1]} {$row[2]}個{$row[3]}されました。<br>";
                     }
-                    $result->free();
                     echo "<br>";
                     ?>
                 </div>

@@ -57,24 +57,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 <script>
-$(document).ready(function() {
-    $(".copyValue").click(function() {
-        var currentVal = $(this).closest('tr').find('.currentValue').text();
-        $(this).closest('tr').find('.inputValue').val(currentVal);
-    });
-
-    $("#copyAllValues").click(function() {
-        $('tbody tr').each(function() {
-            var currentVal = $(this).find('.currentValue').text();
-            $(this).find('.inputValue').val(currentVal);
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".copyValue").forEach(function(button) {
+        button.addEventListener("click", function() {
+            var tr = this.closest('tr');
+            var currentVal = tr.querySelector('.currentValue').textContent;
+            tr.querySelector('.inputValue').value = currentVal;
         });
     });
 
-    $("#clearAllValues").click(function() {
-        $('tbody tr').each(function() {
-            $(this).find('.inputValue').val('');
+    const copyAllBtn = document.getElementById("copyAllValues");
+    if (copyAllBtn) {
+        copyAllBtn.addEventListener("click", function() {
+            document.querySelectorAll("tbody tr").forEach(function(tr) {
+                var currentVal = tr.querySelector('.currentValue').textContent;
+                tr.querySelector('.inputValue').value = currentVal;
+            });
         });
-    });
+    }
+
+    const clearAllBtn = document.getElementById("clearAllValues");
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener("click", function() {
+            document.querySelectorAll("tbody tr").forEach(function(tr) {
+                tr.querySelector('.inputValue').value = '';
+            });
+        });
+    }
 });
 </script>
 

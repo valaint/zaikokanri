@@ -57,58 +57,60 @@
 <audio id="noitem-sound" controls hidden>
   <source src='物品リストにありません.wav'>
 </audio>
-<script src="src/jquery.min.js"></script>
 <!-- <script src="src/bootstrap.bundle.min.js"></script> -->
 <script>
-  $(document).ready(function() {
+  document.addEventListener("DOMContentLoaded", function() {
     var successSound = document.getElementById('success-sound');
     var noitemSound = document.getElementById('noitem-sound');
+    var barcodeForm = document.getElementById("barcode-form");
+    var barcodeInput = document.getElementById("barcode-input");
+    var responseContainer = document.getElementById("response-container");
 
-
-    $("#barcode-form").submit(function(event) {
+    barcodeForm.addEventListener("submit", function(event) {
       event.preventDefault(); // prevent the form from submitting normally
 
-      var barcode = $("#barcode-input").val();
+      var barcode = barcodeInput.value;
 
-      $.ajax({
-        url: 'api_barcode.php',
+      fetch('api_barcode.php', {
         method: 'POST',
-        data: JSON.stringify({
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
           barcodetext: barcode
-        }),
-        contentType: 'application/json',
-        success: function(response) {
-          var data = JSON.parse(response);
-          var htmlContent = "";
-          var success = false;
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        var htmlContent = "";
+        var success = false;
 
-          data.forEach(function(item) {
-            if(item.error) {
-              htmlContent += "<p style='color:red;'>" + item.error + "</p>";
-              if (item.error.includes('物品リストにありません')) {
-      noitemSound.play();
-    }
-            } else {
-              htmlContent += "<p>" + item.article_name + " - " + item.count + "</p>";
-              success = true;
+        data.forEach(function(item) {
+          if(item.error) {
+            htmlContent += "<p style='color:red;'>" + item.error + "</p>";
+            if (item.error.includes('物品リストにありません')) {
+              noitemSound.play();
             }
-          });
-
-          $("#response-container").html(htmlContent);
-          $("#barcode-input").val("");
-          $("#barcode-input").focus();
-
-          if(success) {
-            successSound.play();
+          } else {
+            htmlContent += "<p>" + item.article_name + " - " + item.count + "</p>";
+            success = true;
           }
+        });
+
+        responseContainer.innerHTML = htmlContent;
+        barcodeInput.value = "";
+        barcodeInput.focus();
+
+        if(success) {
+          successSound.play();
         }
-      });
+      })
+      .catch(error => console.error('Error:', error));
     });
 
-
-    $("#barcode-input").keydown(function(e) {
+    barcodeInput.addEventListener("keydown", function(e) {
       if(e.keyCode == 13) {
-        $("#submit-button").click();
+        document.getElementById("submit-button").click();
       }
     });
   });

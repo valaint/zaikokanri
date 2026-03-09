@@ -7,9 +7,9 @@ $stmt_below_threshold->execute();
 $result_below_threshold = $stmt_below_threshold->get_result();
 
 // Fetching data for Recent Activities
-$sql = "SELECT h.type, h.time, h.original_value, h.updated_value, a.article_name"
+$sql = "SELECT h.type, h.timestamp, h.original_value, h.updated_value, a.article_name"
     . " FROM history h JOIN article_info a ON h.article_id = a.article_id"
-    . " ORDER BY h.time DESC LIMIT 5";
+    . " ORDER BY h.timestamp DESC LIMIT 5";
 $stmt_recent_activities = $con->prepare($sql);
 $stmt_recent_activities->execute();
 $result_recent_activities = $stmt_recent_activities->get_result();
@@ -33,21 +33,68 @@ $stmt_error_logs = $con->prepare("SELECT * FROM error_log ORDER BY timestamp DES
 $stmt_error_logs->execute();
 $result_error_logs = $stmt_error_logs->get_result();
 
+// Fetching Dashboard Stats
+$stmt_total_inventory = $con->prepare("SELECT COUNT(*) as total_items, SUM(stock) as total_stock FROM article_info");
+$stmt_total_inventory->execute();
+$result_total_inventory = $stmt_total_inventory->get_result();
+$data_total_inventory = $result_total_inventory->fetch_assoc();
+
+$stmt_total_categories = $con->prepare("SELECT COUNT(*) as total_categories FROM category");
+$stmt_total_categories->execute();
+$result_total_categories = $stmt_total_categories->get_result();
+$data_total_categories = $result_total_categories->fetch_assoc();
+
 ?>
 
 <script>
-$(document).ready(function() {
-    $(".extra-rows").hide();
-
-    $("#loadMore").click(function() {
-        $(".extra-rows").fadeIn();
-        $(this).hide();
+document.addEventListener("DOMContentLoaded", function() {
+    const extraRows = document.querySelectorAll(".extra-rows");
+    extraRows.forEach(row => {
+        row.style.display = 'none';
     });
+
+    const loadMoreBtn = document.getElementById("loadMore");
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener("click", function() {
+            extraRows.forEach(row => {
+                row.style.display = '';
+            });
+            this.style.display = 'none';
+        });
+    }
 });
 </script>
 
 <h2>管理画面へ</h2>
 こちらは管理画面です。
+
+<!-- Displaying Dashboard Stats -->
+<div class="row mb-3 mt-3">
+    <div class="col-md-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Total Article Types</h5>
+                <p class="card-text display-4"><?= $data_total_inventory['total_items'] ?? 0 ?></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Total Items in Stock</h5>
+                <p class="card-text display-4"><?= $data_total_inventory['total_stock'] ?? 0 ?></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Total Categories</h5>
+                <p class="card-text display-4"><?= $data_total_categories['total_categories'] ?? 0 ?></p>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <!-- Displaying Stock Overview -->
@@ -109,7 +156,7 @@ $(document).ready(function() {
                         <td><?php echo $row['type']; ?></td>
                         <td><?php echo $row['original_value']; ?></td>
                         <td><?php echo $row['updated_value']; ?></td>
-                        <td><?php echo $row['time']; ?></td>
+                        <td><?php echo $row['timestamp']; ?></td>
                     </tr>
                 <?php endwhile; ?>
             </tbody>

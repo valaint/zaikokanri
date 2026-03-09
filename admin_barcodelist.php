@@ -130,68 +130,104 @@ include_once 'admin_footer.php';
 ?>
 
 <script>
-$(document).ready(function() {
+document.addEventListener("DOMContentLoaded", function() {
 
-    // Update function
-    $(document).on('click', '.btn-primary', function() {
-    var row = $(this).closest("tr");
-    var id = row.find(".id-input").val(); // new line
-    var barcode = row.find("td:nth-child(1)").find("input").val();
-    var article_id = row.find("td:nth-child(2)").find("select").val();
-    var destock_count = row.find("td:nth-child(3)").find("input").val();
-    var is_prompt = row.find("td:nth-child(4)").find("input").is(':checked') ? 1 : 0;
-
-    $.post("barcode_functions.php", { action: "update", id: id, barcode: barcode, article_id: article_id, destock_count: destock_count, is_prompt: is_prompt })
-        .done(function(data) {
-            console.log("Response:", data);
-            alert("Updated successfully!");
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            console.error("Error:", textStatus, errorThrown);
-            alert("Error updating entry.");
+    function postData(url, data) {
+        const formData = new URLSearchParams();
+        for (const key in data) {
+            formData.append(key, data[key]);
+        }
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
         });
-});
+    }
 
-$(document).on('click', '.btn-danger', function() {
-    var row = $(this).closest("tr");
-    var id = row.find(".id-input").val(); // new line
-    var barcode = row.find("td:nth-child(1)").find("input").val();
+    document.querySelectorAll(".table-bordered").forEach(table => {
+        table.addEventListener("click", function(e) {
+            const target = e.target;
 
-    $.post("barcode_functions.php", { action: "delete", id: id, barcode: barcode })
-        .done(function() {
-            row.remove();
-            alert("Deleted successfully!");
-        })
-        .fail(function() {
-            alert("Error deleting entry.");
-        });
-});
+            // Update function
+            if (target.classList.contains("btn-primary") && target.textContent.trim() !== "追加") {
+                const row = target.closest("tr");
+                const idInput = row.querySelector(".id-input");
+                const id = idInput ? idInput.value : "";
+                // Logic to handle rowspan for barcode where input might be in previous row
+                let barcodeInput = row.querySelector("td:nth-child(1) input[type='text']");
+                let barcode = barcodeInput ? barcodeInput.value : "";
 
-    // Add function
-    $(document).on('click', '.btn-success', function() {
-        var row = $(this).closest("tr");
-        var barcode = row.find("td:nth-child(1)").find("input").val();
-        var article_id = row.find("td:nth-child(2)").find("select").val();
-        var destock_count = row.find("td:nth-child(3)").find("input").val();
-        var is_prompt = row.find("td:nth-child(4)").find("input").is(':checked') ? 1 : 0;
+                let articleSelectIndex = barcodeInput ? 1 : 0;
+                let destockIndex = barcodeInput ? 2 : 1;
+                let promptIndex = barcodeInput ? 3 : 2;
 
-        $.post("barcode_functions.php", { action: "add", barcode: barcode, article_id: article_id, destock_count: destock_count, is_prompt: is_prompt }, function(response) {
-            // The response should contain the new barcode
-            var newRow = '<tr>'
-                + '<td><input type="text" class="form-control" value="' + response.barcode + '"></td>'
-                + '<td><input type="text" class="form-control" value="' + article_id + '"></td>'
-                + '<td><input type="text" class="form-control" value="' + destock_count + '"></td>'
-                + '<td><input type="checkbox" class="form-check-input" ' + (is_prompt ? 'checked' : '') + '></td>'
-                + '<td><button class="btn btn-primary">Update</button>'
-                + ' <button class="btn btn-danger">Delete</button></td>'
-                + '</tr>';
-            row.before(newRow);
-        }, "json")
-        .done(function() {
-            alert("Added successfully!");
-        })
-        .fail(function() {
-            alert("Error adding entry.");
+                const article_id = row.cells[articleSelectIndex].querySelector("select").value;
+                const destock_count = row.cells[destockIndex].querySelector("input").value;
+                const is_prompt = row.cells[promptIndex].querySelector("input[type='checkbox']").checked ? 1 : 0;
+
+                postData("barcode_functions.php", { action: "update", id: id, barcode: barcode, article_id: article_id, destock_count: destock_count, is_prompt: is_prompt })
+                    .then(response => {
+                        if (response.ok) {
+                            alert("Updated successfully!");
+                        } else {
+                            alert("Error updating entry.");
+                        }
+                    })
+                    .catch(err => alert("Error updating entry."));
+            }
+
+            // Delete function
+            if (target.classList.contains("btn-danger")) {
+                const row = target.closest("tr");
+                const idInput = row.querySelector(".id-input");
+                const id = idInput ? idInput.value : "";
+                let barcodeInput = row.querySelector("td:nth-child(1) input[type='text']");
+                let barcode = barcodeInput ? barcodeInput.value : "";
+
+                postData("barcode_functions.php", { action: "delete", id: id, barcode: barcode })
+                    .then(response => {
+                        if (response.ok) {
+                            row.remove();
+                            alert("Deleted successfully!");
+                        } else {
+                            alert("Error deleting entry.");
+                        }
+                    })
+                    .catch(err => alert("Error deleting entry."));
+            }
+
+            // Add function
+            if (target.classList.contains("btn-success")) {
+                const row = target.closest("tr");
+                const barcode = row.cells[0].querySelector("input").value;
+                const article_id = row.cells[1].querySelector("select").value;
+                const destock_count = row.cells[2].querySelector("input").value;
+                const is_prompt = row.cells[3].querySelector("input[type='checkbox']").checked ? 1 : 0;
+
+                postData("barcode_functions.php", { action: "add", barcode: barcode, article_id: article_id, destock_count: destock_count, is_prompt: is_prompt })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.barcode) {
+                            const newRow = document.createElement("tr");
+                            newRow.innerHTML = `
+                                <td><input type="text" class="form-control" value="${data.barcode}"></td>
+                                <td>
+                                    <select class="form-control">
+                                        <option value="${article_id}" selected>${article_id}</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" class="form-control" value="${destock_count}"></td>
+                                <td><input type="checkbox" class="form-check-input" ${is_prompt ? 'checked' : ''}></td>
+                                <td><button class="btn btn-primary">Update</button> <button class="btn btn-danger">Delete</button></td>
+                            `;
+                            row.parentNode.insertBefore(newRow, row);
+                            alert("Added successfully!");
+                        } else {
+                            alert("Error adding entry.");
+                        }
+                    })
+                    .catch(err => alert("Error adding entry."));
+            }
         });
     });
 });

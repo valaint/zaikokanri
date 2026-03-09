@@ -1,8 +1,33 @@
 <?php
 session_start();
+include('connect.php');
 
-if (isset($_SESSION['csv_data'])) {
+// If csv_data is not set in session, fetch the current inventory
+if (!isset($_SESSION['csv_data'])) {
+    $csv_data = [];
+    $csv_data[] = ['Category', 'Article Name', 'Stock']; // Header row
+
+    $sql = "SELECT c.category_name, a.article_name, a.stock
+            FROM article_info a
+            LEFT JOIN category c ON a.category_id = c.category_id
+            ORDER BY a.category_id, a.article_order";
+    $stmt = $con->prepare($sql);
+
+    if ($stmt && $stmt->execute()) {
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $csv_data[] = [
+                $row['category_name'] ?? 'N/A',
+                $row['article_name'],
+                $row['stock']
+            ];
+        }
+    }
+} else {
     $csv_data = $_SESSION['csv_data'];
+}
+
+if (!empty($csv_data)) {
     $date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
     $encoding = isset($_GET['encoding']) ? $_GET['encoding'] : 'utf-8';  // Set default encoding to UTF-8
 

@@ -1,18 +1,30 @@
 function filterTable()
 {
     // Variables
-    let dropdown, table, rows, cells, category, filter;
+    let dropdown, searchInput, table, rows, cells, categoryCell, nameCell, categoryFilter, textFilter;
     dropdown = document.getElementById("categorylist");
+    searchInput = document.getElementById("searchArticleList");
     table = document.getElementById("inventorylist");
     rows = table.getElementsByTagName("tr");
-    filter = dropdown.value;
 
-    // Loops through rows and hides those with countries that don't match the filter
-    for (let row of rows) { // `for...of` loops through the NodeList
+    categoryFilter = dropdown ? dropdown.value : "All";
+    textFilter = searchInput ? searchInput.value.toLowerCase() : "";
+
+    // Loops through rows and hides those that don't match the filters
+    for (let i = 1; i < rows.length; i++) { // Start at 1 to skip header row
+        let row = rows[i];
         cells = row.getElementsByTagName("td");
-        category = cells[0] || null; // gets the 2nd `td` or nothing
-        // if the filter is set to 'All', or this is the header row, or 2nd `td` text matches filter
-        if (filter === "All" || !category || (filter === category.textContent)) {
+        categoryCell = cells[0] || null;
+        nameCell = cells[1] || null;
+
+        if (!categoryCell || !nameCell) {
+            continue;
+        }
+
+        let categoryMatch = (categoryFilter === "All" || categoryFilter === categoryCell.textContent.trim());
+        let textMatch = (textFilter === "" || nameCell.textContent.toLowerCase().includes(textFilter));
+
+        if (categoryMatch && textMatch) {
             row.style.display = ""; // shows this row
         } else {
             row.style.display = "none"; // hides this row

@@ -76,3 +76,73 @@ function updateStock($operation, $article_id, $value, $fromBarcode = 0)
 
     return 1;
 }
+
+/**
+ * Get all categories
+ *
+ * @return array
+ */
+function getCategories()
+{
+    global $con;
+    $categories = [];
+    $stmt = $con->prepare("SELECT category_name FROM category");
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $categories[] = $row['category_name'];
+        }
+        $result->free();
+    }
+    return $categories;
+}
+
+/**
+ * Get full inventory
+ *
+ * @return array
+ */
+function getInventory()
+{
+    global $con;
+    $inventory = [];
+    $sql = "SELECT (SELECT category_name from category"
+        . " WHERE article_info.category_id=category.category_id),"
+        . "article_name,stock,article_id"
+        . " from article_info ORDER BY category_id,article_order";
+    $stmt = $con->prepare($sql);
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_row()) {
+            $inventory[] = $row;
+        }
+        $result->free();
+    }
+    return $inventory;
+}
+
+/**
+ * Get recent history
+ *
+ * @param int $limit
+ * @return array
+ */
+function getRecentHistory($limit = 30)
+{
+    global $con;
+    $history = [];
+    $sql = "SELECT time,"
+        . "(SELECT article_name from article_info"
+        . " WHERE article_info.article_id=history.article_id),"
+        . "changed_value,type from history ORDER by `time` desc LIMIT ?";
+    $stmt = $con->prepare($sql);
+    $stmt->bind_param("i", $limit);
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_row()) {
+            $history[] = $row;
+        }
+        $result->free();
+    }
+    return $history;
+}
