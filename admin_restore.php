@@ -26,22 +26,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 function restore_stock($con, $date, $stock_column)
 {
-    // Fetch all rows from stock_log for the selected date
-    $stmt = $con->prepare("SELECT article_id, $stock_column FROM stock_log WHERE date = ?");
+    // Ensure the stock column is valid to prevent SQL injection
+    $allowed_columns = ['original_stock', 'updated_stock'];
+    if (!in_array($stock_column, $allowed_columns)) {
+        echo "<div class='alert alert-danger'>Invalid stock column selected.</div>";
+        return;
+    }
+
+    // Update the current stock in article_info using a single JOIN query
+    $query = "UPDATE article_info ai
+              JOIN stock_log sl ON ai.article_id = sl.article_id
+              SET ai.stock = sl.$stock_column
+              WHERE sl.date = ?";
+
+    $stmt = $con->prepare($query);
     $stmt->bind_param("s", $date);
-    $stmt->execute();
-    $result = $stmt->get_result();
 
-    while ($row = $result->fetch_assoc()) {
-        $article_id = $row['article_id'];
-        $stock = $row[$stock_column];
-
-        // Update the current stock in article_info
-        $stmt = $con->prepare("UPDATE article_info SET stock = ? WHERE article_id = ?");
-        $stmt->bind_param("ii", $stock, $article_id);
-        $stmt->execute();
-
-        echo "<div class='alert alert-success'>Stock restored successfully for Article ID: $article_id on Date: $date</div>";
+    if ($stmt->execute()) {
+        $affected_rows = $stmt->affected_rows;
+        echo "<div class='alert alert-success'>Stock restored successfully for $affected_rows items on Date: $date</div>";
+    } else {
+        echo "<div class='alert alert-danger'>Failed to restore stock.</div>";
     }
 }
 
