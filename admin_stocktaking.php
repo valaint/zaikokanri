@@ -3,40 +3,56 @@ include_once 'admin_header.php';
 
 // Check if the request method is POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $stmt_select = $con->prepare("SELECT stock FROM article_info WHERE article_id = ?");
-    $stmt_select->bind_param("i", $bind_article_id);
-
-    $stmt_update = $con->prepare("UPDATE article_info SET stock = ? WHERE article_id = ?");
-    $stmt_update->bind_param("ii", $bind_updated_stock, $bind_article_id);
-
-    $stmt_insert = $con->prepare("INSERT INTO stock_log (article_id, original_stock, updated_stock, date) VALUES (?, ?, ?, NOW()) ON DUPLICATE KEY `updated_stock` = VALUES(`updated_stock`);");
-    $stmt_insert->bind_param("iii", $bind_article_id, $bind_original_stock, $bind_updated_stock);
-
+    $valid_post = [];
     foreach ($_POST as $article_id => $updated_stock) {
         // Skip if updated_stock is not provided or is not a positive integer
-        if (!isset($updated_stock) || $updated_stock < 0) {
-            continue;
+        if (isset($updated_stock) && $updated_stock >= 0 && is_numeric($article_id)) {
+            $valid_post[(int)$article_id] = (int)$updated_stock;
         }
-
-        $bind_article_id = $article_id;
-        $bind_updated_stock = $updated_stock;
-
-        // Get current stock from article_info table
-        $stmt_select->execute();
-        $result = $stmt_select->get_result();
-        $row = $result->fetch_row();
-        $bind_original_stock = $row[0];
-
-        // Update stock in article_info table
-        $stmt_update->execute();
-
-        // Insert a log entry in stock_log table
-        $stmt_insert->execute();
     }
 
-    $stmt_select->close();
-    $stmt_update->close();
-    $stmt_insert->close();
+    if (!empty($valid_post)) {
+        // Get all original stocks in one query
+        $article_ids = array_keys($valid_post);
+        $placeholders = implode(',', array_fill(0, count($article_ids), '?'));
+        $types = str_repeat('i', count($article_ids));
+
+        $stmt_select = $con->prepare("SELECT article_id, stock FROM article_info WHERE article_id IN ($placeholders)");
+        $stmt_select->bind_param($types, ...$article_ids);
+        $stmt_select->execute();
+        $result = $stmt_select->get_result();
+
+        $original_stocks = [];
+        while ($row = $result->fetch_assoc()) {
+            $original_stocks[$row['article_id']] = $row['stock'];
+        }
+        $stmt_select->close();
+
+        $stmt_update = $con->prepare("UPDATE article_info SET stock = ? WHERE article_id = ?");
+        $stmt_update->bind_param("ii", $bind_updated_stock, $bind_article_id);
+
+        $stmt_insert = $con->prepare("INSERT INTO stock_log (article_id, original_stock, updated_stock, date) VALUES (?, ?, ?, NOW()) ON DUPLICATE KEY `updated_stock` = VALUES(`updated_stock`);");
+        $stmt_insert->bind_param("iii", $bind_article_id, $bind_original_stock, $bind_updated_stock);
+
+        foreach ($valid_post as $article_id => $updated_stock) {
+            if (!isset($original_stocks[$article_id])) {
+                continue;
+            }
+
+            $bind_article_id = $article_id;
+            $bind_updated_stock = $updated_stock;
+            $bind_original_stock = $original_stocks[$article_id];
+
+            // Update stock in article_info table
+            $stmt_update->execute();
+
+            // Insert a log entry in stock_log table
+            $stmt_insert->execute();
+        }
+
+        $stmt_update->close();
+        $stmt_insert->close();
+    }
 
     // Set a success message
     $_SESSION['success_msg'] = '在庫数が更新されました。';
